@@ -17,27 +17,27 @@
         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
         QrPix Pro
       </h1>
-      <p class="text-xs text-slate-500 mt-1">Gerador de QR Code Pix Multi-Chaves</p>
+      <p class="text-xs text-slate-500 mt-1">Gerador de QR Code Pix</p>
     </header>
 
-    <!-- Seletor de Chaves Salvas -->
-    <section class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
-      <label for="selectKey" class="block text-xs font-bold text-blue-900 uppercase tracking-wider mb-2">
-        📁 Carregar Chave Salva:
-      </label>
-      <select id="selectKey" onchange="loadSelectedKey()" class="w-full p-2.5 bg-white border border-blue-300 rounded-lg text-sm text-slate-700 font-medium focus:ring-2 focus:ring-blue-500 outline-none">
-        <option value="">-- Nova Chave / Digitação Manual --</option>
-      </select>
-    </section>
-
-    <!-- Formulário de Dados -->
+    <!-- Formulário Principal -->
     <form id="pixForm" onsubmit="generatePix(event)" class="space-y-4">
       
+      <!-- Seletor de Chaves Salvas -->
       <div>
-        <label for="keyAlias" class="block text-xs font-semibold text-slate-600 mb-1">Apelido da Chave (ex: Loja, Pessoal):</label>
+        <label for="selectKey" class="block text-xs font-semibold text-slate-600 mb-1">Minhas Chaves Salvas:</label>
+        <select id="selectKey" onchange="loadSelectedKey()" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-700 font-medium focus:ring-2 focus:ring-blue-500 outline-none">
+          <option value="">-- Nova Chave / Selecione --</option>
+        </select>
+      </div>
+
+      <!-- Apelido da Chave -->
+      <div>
+        <label for="keyAlias" class="block text-xs font-semibold text-slate-600 mb-1">Apelido da Chave:</label>
         <input type="text" id="keyAlias" placeholder="Ex: Mercado Pago, Nubank" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
       </div>
 
+      <!-- Tipo e Chave -->
       <div class="grid grid-cols-3 gap-2">
         <div class="col-span-1">
           <label for="keyType" class="block text-xs font-semibold text-slate-600 mb-1">Tipo:</label>
@@ -55,11 +55,13 @@
         </div>
       </div>
 
+      <!-- Recebedor -->
       <div>
         <label for="merchantName" class="block text-xs font-semibold text-slate-600 mb-1">Nome do Recebedor:</label>
-        <input type="text" id="merchantName" required maxlength="25" placeholder="Nome completo ou da empresa" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+        <input type="text" id="merchantName" required maxlength="25" placeholder="Nome completo ou empresa" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
       </div>
 
+      <!-- Cidade e Valor -->
       <div class="grid grid-cols-2 gap-2">
         <div>
           <label for="merchantCity" class="block text-xs font-semibold text-slate-600 mb-1">Cidade:</label>
@@ -67,26 +69,27 @@
         </div>
         <div>
           <label for="txAmount" class="block text-xs font-semibold text-slate-600 mb-1">Valor (R$) <span class="text-slate-400 font-normal">(Opcional)</span>:</label>
-          <input type="number" step="0.01" min="0" id="txAmount" placeholder="0,00" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <input type="text" id="txAmount" placeholder="0,00" oninput="formatCurrency(this)" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
         </div>
       </div>
 
-      <!-- Gerenciamento da Chave -->
+      <!-- Botões de Salvar/Excluir Chave -->
       <div class="flex gap-2 pt-1">
         <button type="button" onclick="saveCurrentKey()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-3 rounded-lg text-xs transition border border-slate-300 flex items-center justify-center gap-1">
-          💾 Salvar / Atualizar Chave
+          ★ Salvar / Atualizar Chave
         </button>
         <button type="button" id="btnDeleteKey" onclick="deleteCurrentKey()" class="hidden bg-red-50 hover:bg-red-100 text-red-600 font-semibold py-2 px-3 rounded-lg text-xs transition border border-red-200">
           🗑️ Excluir
         </button>
       </div>
 
+      <!-- Gerar QR Code -->
       <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-md transition transform active:scale-95 flex items-center justify-center gap-2 mt-4">
         ⚡ Gerar QR Code Pix
       </button>
     </form>
 
-    <!-- Área do Resultado -->
+    <!-- Área de Resultado -->
     <section id="resultArea" class="hidden mt-6 pt-6 border-t border-slate-200 text-center space-y-4">
       <div id="qrcode" class="flex justify-center p-3 bg-white border border-slate-200 rounded-xl inline-block shadow-sm"></div>
 
@@ -114,6 +117,23 @@
     const DB_VERSION = 1;
     let db = null;
 
+    // Máscara de Moeda (R$)
+    function formatCurrency(input) {
+      let value = input.value.replace(/\D/g, '');
+      if (!value) {
+        input.value = '';
+        return;
+      }
+      value = (parseInt(value, 10) / 100).toFixed(2);
+      input.value = value.replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    function getRawAmount() {
+      const val = document.getElementById('txAmount').value;
+      if (!val) return '0.00';
+      return val.replace(/\./g, '').replace(',', '.');
+    }
+
     // Inicialização do IndexedDB
     function initDB() {
       const request = indexedDB.open(DB_NAME, DB_VERSION);
@@ -127,10 +147,9 @@
         db = e.target.result;
         populateKeysSelect();
       };
-      request.onerror = (e) => console.error("Erro no IndexedDB", e);
     }
 
-    // Carregar Chaves no Dropdown
+    // Preencher Seletor de Chaves
     function populateKeysSelect() {
       if (!db) return;
       const tx = db.transaction('keys', 'readonly');
@@ -140,25 +159,27 @@
       request.onsuccess = () => {
         const keys = request.result;
         const select = document.getElementById('selectKey');
-        select.innerHTML = '<option value="">-- Nova Chave / Digitação Manual --</option>';
+        select.innerHTML = '<option value="">-- Nova Chave / Selecione --</option>';
         
         keys.forEach(k => {
           const opt = document.createElement('option');
           opt.value = k.id;
-          const shortKey = k.key.length > 8 ? `...${k.key.slice(-4)}` : k.key;
-          opt.textContent = `${k.alias || 'Sem Nome'} (${shortKey})`;
+          opt.textContent = k.alias || k.key;
           select.appendChild(opt);
         });
       };
     }
 
-    // Carregar Chave Selecionada
+    // Carregar dados ao selecionar
     function loadSelectedKey() {
       const id = document.getElementById('selectKey').value;
       const btnDelete = document.getElementById('btnDeleteKey');
 
       if (!id) {
-        document.getElementById('pixForm').reset();
+        document.getElementById('keyAlias').value = '';
+        document.getElementById('pixKey').value = '';
+        document.getElementById('merchantName').value = '';
+        document.getElementById('merchantCity').value = '';
         btnDelete.classList.add('hidden');
         return;
       }
@@ -203,9 +224,10 @@
 
       request.onsuccess = (e) => {
         showToast("Chave salva com sucesso!");
+        const savedId = selectedId || e.target.result;
         populateKeysSelect();
         setTimeout(() => {
-          document.getElementById('selectKey').value = selectedId || e.target.result;
+          document.getElementById('selectKey').value = savedId;
           loadSelectedKey();
         }, 100);
       };
@@ -221,7 +243,10 @@
         const store = tx.objectStore('keys');
         store.delete(Number(id)).onsuccess = () => {
           showToast("Chave excluída.");
-          document.getElementById('pixForm').reset();
+          document.getElementById('keyAlias').value = '';
+          document.getElementById('pixKey').value = '';
+          document.getElementById('merchantName').value = '';
+          document.getElementById('merchantCity').value = '';
           document.getElementById('selectKey').value = "";
           document.getElementById('btnDeleteKey').classList.add('hidden');
           populateKeysSelect();
@@ -250,7 +275,6 @@
       return `${id}${len}${val}`;
     }
 
-    // Normalizador de Texto
     function sanitizeText(str) {
       return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().trim();
     }
@@ -262,7 +286,7 @@
       let key = document.getElementById('pixKey').value.trim();
       let name = sanitizeText(document.getElementById('merchantName').value);
       let city = sanitizeText(document.getElementById('merchantCity').value);
-      let amountVal = document.getElementById('txAmount').value;
+      let amountVal = getRawAmount();
 
       const merchantAccountInfo = formatField('00', 'br.gov.bcb.pix') + formatField('01', key);
       let payload = formatField('00', '01') +
@@ -270,7 +294,7 @@
                     formatField('52', '0000') +
                     formatField('53', '986');
 
-      if (amountVal && parseFloat(amountVal) > 0) {
+      if (parseFloat(amountVal) > 0) {
         payload += formatField('54', parseFloat(amountVal).toFixed(2));
       }
 
@@ -312,13 +336,12 @@
       const payload = document.getElementById("payloadText").value;
       const amount = document.getElementById("txAmount").value;
       let msg = `Olá! Segue o código Pix para pagamento:\n\n\`${payload}\``;
-      if (amount && parseFloat(amount) > 0) {
-        msg = `Olá! Segue o Pix no valor de *R$ ${parseFloat(amount).toFixed(2)}*:\n\n\`${payload}\``;
+      if (amount) {
+        msg = `Olá! Segue o Pix no valor de *R$ ${amount}*:\n\n\`${payload}\``;
       }
       window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
     }
 
-    // Exibir Toast
     function showToast(msg) {
       const toast = document.getElementById('toast');
       toast.textContent = msg;
@@ -326,7 +349,6 @@
       setTimeout(() => toast.classList.add('hidden'), 2500);
     }
 
-    // Inicializar App e PWA
     window.onload = () => {
       initDB();
       if ('serviceWorker' in navigator) {
