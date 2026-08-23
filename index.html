@@ -1,671 +1,338 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QrPix (Ambiente de Testes)</title>
-    
-    <!-- Configurações PWA -->
-    <link rel="manifest" href="./manifest.json">
-    <meta name="theme-color" content="#2563eb">
-    <link rel="icon" type="image/svg+xml" href="./icon.svg?v=2">
-
-    <!-- Biblioteca QR Code -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
-        
-        body { 
-            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); 
-            padding: 20px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center;
-            min-height: 100vh;
-        }
-        
-        .container { 
-            background: #ffffff; 
-            padding: 25px; 
-            border-radius: 20px; 
-            max-width: 450px; 
-            width: 100%; 
-            box-shadow: 0 12px 30px rgba(37, 99, 235, 0.12); 
-            border: 1px solid #bfdbfe;
-        }
-        
-        h1 { 
-            font-size: 30px; 
-            font-weight: 800; 
-            color: #1e3a8a; 
-            margin-bottom: 20px; 
-            text-align: center;
-            letter-spacing: 0.5px;
-        }
-        .pix-color { color: #06b6d4; }
-
-        label { font-size: 14px; font-weight: 700; color: #1e3a8a; display: block; margin-top: 14px; }
-        
-        input, select { 
-            width: 100%; 
-            padding: 12px; 
-            margin-top: 6px; 
-            border: 2px solid #bfdbfe; 
-            border-radius: 10px; 
-            font-size: 16px; 
-            background: #f8fafc; 
-            color: #1e293b;
-            transition: all 0.2s;
-        }
-        input:focus, select:focus {
-            outline: none;
-            border-color: #2563eb;
-            background: #ffffff;
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.18);
-        }
-
-        .favoritos-box {
-            background: #f0f9ff;
-            border: 2px dashed #06b6d4;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-        }
-
-        .btn-group-fav {
-            display: flex;
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        button { 
-            width: 100%; 
-            padding: 14px; 
-            background-color: #2563eb; 
-            color: white; 
-            border: none; 
-            border-radius: 10px; 
-            font-size: 16px; 
-            font-weight: bold; 
-            margin-top: 15px; 
-            cursor: pointer; 
-            transition: background 0.2s, transform 0.1s, color 0.2s;
-        }
-        button:hover { background-color: #1d4ed8; }
-        button:active { transform: scale(0.99); }
-
-        .btn-secundario {
-            background-color: #0284c7;
-            padding: 10px;
-            font-size: 14px;
-            margin-top: 0;
-        }
-        .btn-secundario:hover { background-color: #0369a1; }
-
-        .btn-danger {
-            background-color: #ef4444;
-            padding: 10px;
-            font-size: 14px;
-            margin-top: 0;
-            width: 40%;
-        }
-        .btn-danger:hover { background-color: #dc2626; }
-        
-        .btn-whatsapp { background-color: #25d366; color: white; margin-top: 10px; }
-        .btn-whatsapp:hover { background-color: #1eb954; }
-        
-        #btn-instalar { background-color: #0f172a; color: white; display: none; }
-        #btn-instalar:hover { background-color: #1e293b; }
-        
-        #qrcode-container { 
-            margin-top: 20px; 
-            display: flex; 
-            justify-content: center; 
-            background: #ffffff; 
-            padding: 12px;
-            border-radius: 12px;
-            border: 1px dashed #38bdf8;
-        }
-        
-        .result-box { display: none; margin-top: 20px; }
-        
-        textarea { 
-            width: 100%; 
-            height: 85px; 
-            margin-top: 8px; 
-            padding: 10px; 
-            border-radius: 10px; 
-            border: 2px solid #bfdbfe; 
-            font-family: monospace; 
-            font-size: 12px; 
-            resize: none; 
-            background: #f8fafc; 
-            color: #1e3a8a;
-        }
-
-        .toast {
-            display: none;
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #06b6d4;
-            color: #0f172a;
-            padding: 14px 24px;
-            border-radius: 30px;
-            font-weight: 800;
-            font-size: 15px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-            z-index: 9999;
-            text-align: center;
-            white-space: nowrap;
-        }
-        .toast.show { display: block; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QrPix Pro</title>
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#2563eb">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
-<body>
+<body class="bg-slate-100 min-h-screen flex flex-col items-center p-4 text-slate-800">
 
-<div class="container">
-    <h1>Qr<span class="pix-color">Pix</span></h1>
+  <main class="w-full max-w-md bg-white rounded-2xl shadow-lg p-6 my-auto border border-slate-200">
+    <header class="text-center mb-6">
+      <h1 class="text-2xl font-bold text-blue-600 flex items-center justify-center gap-2">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+        QrPix Pro
+      </h1>
+      <p class="text-xs text-slate-500 mt-1">Gerador de QR Code Pix Multi-Chaves</p>
+    </header>
 
-    <!-- GERENCIADOR DE FAVORITOS / MULTIPLAS CHAVES -->
-    <div class="favoritos-box">
-        <label for="selectFavoritos" style="margin-top: 0;">Minhas Chaves Salvas:</label>
-        <select id="selectFavoritos" onchange="carregarChaveSelecionada()">
-            <option value="">-- Nova / Digitação Manual --</option>
-        </select>
+    <!-- Seletor de Chaves Salvas -->
+    <section class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+      <label for="selectKey" class="block text-xs font-bold text-blue-900 uppercase tracking-wider mb-2">
+        📁 Carregar Chave Salva:
+      </label>
+      <select id="selectKey" onchange="loadSelectedKey()" class="w-full p-2.5 bg-white border border-blue-300 rounded-lg text-sm text-slate-700 font-medium focus:ring-2 focus:ring-blue-500 outline-none">
+        <option value="">-- Nova Chave / Digitação Manual --</option>
+      </select>
+    </section>
 
-        <div id="divApelido" style="margin-top: 8px;">
-            <input type="text" id="apelidoChave" placeholder="Apelido desta chave (Ex: Minha Loja, Itaú, etc)">
+    <!-- Formulário de Dados -->
+    <form id="pixForm" onsubmit="generatePix(event)" class="space-y-4">
+      
+      <div>
+        <label for="keyAlias" class="block text-xs font-semibold text-slate-600 mb-1">Apelido da Chave (ex: Loja, Pessoal):</label>
+        <input type="text" id="keyAlias" placeholder="Ex: Mercado Pago, Nubank" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+      </div>
+
+      <div class="grid grid-cols-3 gap-2">
+        <div class="col-span-1">
+          <label for="keyType" class="block text-xs font-semibold text-slate-600 mb-1">Tipo:</label>
+          <select id="keyType" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <option value="CPF">CPF</option>
+            <option value="CNPJ">CNPJ</option>
+            <option value="PHONE">Celular</option>
+            <option value="EMAIL">E-mail</option>
+            <option value="EVP">Aleatória</option>
+          </select>
         </div>
-
-        <div class="btn-group-fav">
-            <button type="button" class="btn-secundario" onclick="salvarChaveFavorita()">★ Salvar / Atualizar Chave</button>
-            <button type="button" id="btnExcluirFav" class="btn-danger" style="display: none;" onclick="excluirChaveFavorita()">Excluir</button>
+        <div class="col-span-2">
+          <label for="pixKey" class="block text-xs font-semibold text-slate-600 mb-1">Chave Pix:</label>
+          <input type="text" id="pixKey" required placeholder="Digite a chave" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
         </div>
-    </div>
+      </div>
 
-    <label for="tipoChave">Tipo de Chave Pix:</label>
-    <select id="tipoChave" onchange="alterarTipoChave()">
-        <option value="CELULAR">Celular</option>
-        <option value="CPF">CPF</option>
-        <option value="CNPJ">CNPJ</option>
-        <option value="EMAIL">E-mail</option>
-        <option value="EVP">Chave Aleatória (EVP)</option>
-    </select>
+      <div>
+        <label for="merchantName" class="block text-xs font-semibold text-slate-600 mb-1">Nome do Recebedor:</label>
+        <input type="text" id="merchantName" required maxlength="25" placeholder="Nome completo ou da empresa" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+      </div>
 
-    <label for="chave" id="labelChave">Chave Pix (DDD + Número):</label>
-    <input type="text" id="chave" placeholder="(00) 00000-0000">
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label for="merchantCity" class="block text-xs font-semibold text-slate-600 mb-1">Cidade:</label>
+          <input type="text" id="merchantCity" required maxlength="15" placeholder="Ex: Sao Paulo" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+        <div>
+          <label for="txAmount" class="block text-xs font-semibold text-slate-600 mb-1">Valor (R$) <span class="text-slate-400 font-normal">(Opcional)</span>:</label>
+          <input type="number" step="0.01" min="0" id="txAmount" placeholder="0,00" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+      </div>
 
-    <label for="nome">Nome do Recebedor:</label>
-    <input type="text" id="nome" placeholder="Seu Nome ou Razão Social">
+      <!-- Gerenciamento da Chave -->
+      <div class="flex gap-2 pt-1">
+        <button type="button" onclick="saveCurrentKey()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-3 rounded-lg text-xs transition border border-slate-300 flex items-center justify-center gap-1">
+          💾 Salvar / Atualizar Chave
+        </button>
+        <button type="button" id="btnDeleteKey" onclick="deleteCurrentKey()" class="hidden bg-red-50 hover:bg-red-100 text-red-600 font-semibold py-2 px-3 rounded-lg text-xs transition border border-red-200">
+          🗑️ Excluir
+        </button>
+      </div>
 
-    <label for="cidade">Cidade:</label>
-    <input type="text" id="cidade" placeholder="Sua Cidade">
+      <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-md transition transform active:scale-95 flex items-center justify-center gap-2 mt-4">
+        ⚡ Gerar QR Code Pix
+      </button>
+    </form>
 
-    <label for="valor">Valor (R$) (Opcional):</label>
-    <input type="text" id="valor" placeholder="0,00" inputmode="numeric">
+    <!-- Área do Resultado -->
+    <section id="resultArea" class="hidden mt-6 pt-6 border-t border-slate-200 text-center space-y-4">
+      <div id="qrcode" class="flex justify-center p-3 bg-white border border-slate-200 rounded-xl inline-block shadow-sm"></div>
 
-    <button type="button" onclick="gerarPix()">Gerar QR Code</button>
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 mb-1">Código Pix Copia e Cola:</label>
+        <textarea id="payloadText" readonly rows="3" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-600 break-all focus:outline-none cursor-pointer" onclick="copyPayload()"></textarea>
+      </div>
 
-    <button type="button" id="btn-instalar">Instalar App no Celular</button>
+      <div class="grid grid-cols-2 gap-2">
+        <button onclick="copyPayload()" class="bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold py-2.5 px-3 rounded-lg text-xs border border-blue-200 transition">
+          📋 Copiar Código
+        </button>
+        <button onclick="shareWhatsApp()" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1">
+          💬 WhatsApp
+        </button>
+      </div>
+    </section>
 
-    <div id="result" class="result-box">
-        <div id="qrcode-container"></div>
+    <!-- Notificação Toast -->
+    <div id="toast" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs px-4 py-2 rounded-full shadow-lg transition-opacity duration-300 z-50"></div>
+  </main>
+
+  <script>
+    const DB_NAME = 'QrPixDB_Pro';
+    const DB_VERSION = 1;
+    let db = null;
+
+    // Inicialização do IndexedDB
+    function initDB() {
+      const request = indexedDB.open(DB_NAME, DB_VERSION);
+      request.onupgradeneeded = (e) => {
+        const database = e.target.result;
+        if (!database.objectStoreNames.contains('keys')) {
+          database.createObjectStore('keys', { keyPath: 'id', autoIncrement: true });
+        }
+      };
+      request.onsuccess = (e) => {
+        db = e.target.result;
+        populateKeysSelect();
+      };
+      request.onerror = (e) => console.error("Erro no IndexedDB", e);
+    }
+
+    // Carregar Chaves no Dropdown
+    function populateKeysSelect() {
+      if (!db) return;
+      const tx = db.transaction('keys', 'readonly');
+      const store = tx.objectStore('keys');
+      const request = store.getAll();
+
+      request.onsuccess = () => {
+        const keys = request.result;
+        const select = document.getElementById('selectKey');
+        select.innerHTML = '<option value="">-- Nova Chave / Digitação Manual --</option>';
         
-        <label for="pix-payload">Código Pix Copia e Cola:</label>
-        <textarea id="pix-payload" readonly></textarea>
-        
-        <button type="button" id="btn-copiar" onclick="copiarPix()">Copiar Código Pix</button>
-        <button type="button" class="btn-whatsapp" onclick="enviarWhatsApp()">Enviar no WhatsApp</button>
-    </div>
-</div>
-
-<div id="toast" class="toast">✓ Código Pix copiado!</div>
-
-<script>
-// --- BANCO DE DADOS PERSISTENTE ---
-let db;
-const dbName = "QrPixDatabase_TESTE";
-let listaChavesSalvas = [];
-
-function iniciarBanco() {
-    return new Promise((resolve) => {
-        const request = indexedDB.open(dbName, 2); // Versão incrementada para schema de chaves
-        request.onupgradeneeded = function(e) {
-            let db = e.target.result;
-            if (!db.objectStoreNames.contains("dados")) {
-                db.createObjectStore("dados", { keyPath: "campo" });
-            }
-            if (!db.objectStoreNames.contains("chaves")) {
-                db.createObjectStore("chaves", { keyPath: "id" });
-            }
-        };
-        request.onsuccess = function(e) {
-            db = e.target.result;
-            resolve();
-        };
-        request.onerror = function() {
-            resolve();
-        };
-    });
-}
-
-function salvarDado(campo, valor) {
-    localStorage.setItem('pix_teste_' + campo, valor);
-
-    if (db) {
-        try {
-            const tx = db.transaction("dados", "readwrite");
-            const store = tx.objectStore("dados");
-            store.put({ campo: campo, valor: valor });
-        } catch (err) {}
-    }
-}
-
-// GERENCIAMENTO DE MÚLTIPLAS CHAVES SALVAS
-async function carregarChavesFavoritas() {
-    let salvas = localStorage.getItem('pix_teste_chaves_lista');
-    if (salvas) {
-        try { listaChavesSalvas = JSON.parse(salvas); } catch(e) { listaChavesSalvas = []; }
-    }
-
-    if (db && listaChavesSalvas.length === 0) {
-        try {
-            const tx = db.transaction("chaves", "readonly");
-            const store = tx.objectStore("chaves");
-            const req = store.getAll();
-            req.onsuccess = () => {
-                if (req.result && req.result.length > 0) {
-                    listaChavesSalvas = req.result;
-                    atualizarSelectFavoritos();
-                }
-            };
-        } catch (e) {}
-    } else {
-        atualizarSelectFavoritos();
-    }
-}
-
-function atualizarSelectFavoritos() {
-    const select = document.getElementById('selectFavoritos');
-    select.innerHTML = '<option value="">-- Nova / Digitação Manual --</option>';
-
-    listaChavesSalvas.forEach((item, index) => {
-        let opt = document.createElement('option');
-        opt.value = index;
-        opt.innerText = item.apelido || item.chave;
-        select.appendChild(opt);
-    });
-}
-
-function salvarChaveFavorita() {
-    let apelido = document.getElementById('apelidoChave').value.trim();
-    let tipo = document.getElementById('tipoChave').value;
-    let chave = document.getElementById('chave').value.trim();
-    let nome = document.getElementById('nome').value.trim();
-    let cidade = document.getElementById('cidade').value.trim();
-
-    if (!chave || !nome || !cidade) {
-        alert('Preencha pelo menos a Chave, Nome e Cidade para salvar como favorita.');
-        return;
-    }
-
-    if (!apelido) {
-        apelido = chave;
-    }
-
-    let selectedIndex = document.getElementById('selectFavoritos').value;
-    let itemData = {
-        id: selectedIndex !== "" ? listaChavesSalvas[selectedIndex].id : Date.now().toString(),
-        apelido: apelido,
-        tipo: tipo,
-        chave: chave,
-        nome: nome,
-        cidade: cidade
-    };
-
-    if (selectedIndex !== "") {
-        listaChavesSalvas[selectedIndex] = itemData;
-    } else {
-        listaChavesSalvas.push(itemData);
-    }
-
-    // Persistir em localStorage e IndexedDB
-    localStorage.setItem('pix_teste_chaves_lista', JSON.stringify(listaChavesSalvas));
-    if (db) {
-        try {
-            const tx = db.transaction("chaves", "readwrite");
-            const store = tx.objectStore("chaves");
-            store.put(itemData);
-        } catch(e) {}
-    }
-
-    atualizarSelectFavoritos();
-    document.getElementById('selectFavoritos').value = selectedIndex !== "" ? selectedIndex : (listaChavesSalvas.length - 1);
-    carregarChaveSelecionada();
-    mostrarToast("Chave salva com sucesso!");
-}
-
-function carregarChaveSelecionada() {
-    let index = document.getElementById('selectFavoritos').value;
-    let btnExcluir = document.getElementById('btnExcluirFav');
-
-    if (index === "") {
-        btnExcluir.style.display = 'none';
-        document.getElementById('apelidoChave').value = '';
-        return;
-    }
-
-    let item = listaChavesSalvas[index];
-    if (item) {
-        document.getElementById('apelidoChave').value = item.apelido || '';
-        document.getElementById('tipoChave').value = item.tipo;
-        alterarTipoChave();
-        document.getElementById('chave').value = item.chave;
-        document.getElementById('nome').value = item.nome;
-        document.getElementById('cidade').value = item.cidade;
-
-        salvarDado('tipoChave', item.tipo);
-        salvarDado('chave', item.chave);
-        salvarDado('nome', item.nome);
-        salvarDado('cidade', item.cidade);
-
-        btnExcluir.style.display = 'block';
-    }
-}
-
-function excluirChaveFavorita() {
-    let index = document.getElementById('selectFavoritos').value;
-    if (index === "") return;
-
-    let item = listaChavesSalvas[index];
-    if (confirm(`Deseja realmente remover a chave "${item.apelido || item.chave}"?`)) {
-        listaChavesSalvas.splice(index, 1);
-        localStorage.setItem('pix_teste_chaves_lista', JSON.stringify(listaChavesSalvas));
-
-        if (db && item.id) {
-            try {
-                const tx = db.transaction("chaves", "readwrite");
-                const store = tx.objectStore("chaves");
-                store.delete(item.id);
-            } catch(e) {}
-        }
-
-        atualizarSelectFavoritos();
-        document.getElementById('selectFavoritos').value = "";
-        carregarChaveSelecionada();
-        mostrarToast("Chave removida!");
-    }
-}
-
-function carregarDados() {
-    let tipo = localStorage.getItem('pix_teste_tipoChave');
-    let chave = localStorage.getItem('pix_teste_chave');
-    let nome = localStorage.getItem('pix_teste_nome');
-    let cidade = localStorage.getItem('pix_teste_cidade');
-
-    if (tipo) document.getElementById('tipoChave').value = tipo;
-    alterarTipoChave();
-
-    if (chave) document.getElementById('chave').value = chave;
-    if (nome) document.getElementById('nome').value = nome;
-    if (cidade) document.getElementById('cidade').value = cidade;
-}
-
-function alterarTipoChave() {
-    const tipo = document.getElementById('tipoChave').value;
-    const label = document.getElementById('labelChave');
-    const input = document.getElementById('chave');
-
-    salvarDado('tipoChave', tipo);
-
-    if (tipo === 'CELULAR') {
-        label.innerText = 'Chave Pix (DDD + Número):';
-        input.placeholder = '(00) 00000-0000';
-    } else if (tipo === 'CPF') {
-        label.innerText = 'Chave Pix (CPF):';
-        input.placeholder = '000.000.000-00';
-    } else if (tipo === 'CNPJ') {
-        label.innerText = 'Chave Pix (CNPJ):';
-        input.placeholder = '00.000.000/0001-00';
-    } else if (tipo === 'EMAIL') {
-        label.innerText = 'Chave Pix (E-mail):';
-        input.placeholder = 'seuemail@exemplo.com';
-    } else if (tipo === 'EVP') {
-        label.innerText = 'Chave Aleatória (EVP):';
-        input.placeholder = '00000000-0000-0000-0000-000000000000';
-    }
-}
-
-document.addEventListener('DOMContentLoaded', async function() {
-    await iniciarBanco();
-    carregarDados();
-    await carregarChavesFavoritas();
-
-    if (navigator.storage && navigator.storage.persist) {
-        navigator.storage.persist();
-    }
-
-    document.getElementById('chave').addEventListener('input', (e) => salvarDado('chave', e.target.value));
-    document.getElementById('nome').addEventListener('input', (e) => salvarDado('nome', e.target.value));
-    document.getElementById('cidade').addEventListener('input', (e) => salvarDado('cidade', e.target.value));
-
-    document.getElementById('pix-payload').addEventListener('click', function() { copiarPix(); });
-});
-
-// Service Worker
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-        navigator.serviceWorker.register('./sw.js').catch(function(err) {});
-    });
-}
-
-// Instalação PWA
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    document.getElementById('btn-instalar').style.display = 'block';
-});
-
-document.getElementById('btn-instalar').addEventListener('click', (e) => {
-    if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
-    }
-});
-
-// MÁSCARA DE MOEDA CORRIGIDA E COMPATÍVEL COM PWA MÓVEL
-document.getElementById('valor').addEventListener('input', function(e) {
-    let value = e.target.value.replace(/\D/g, ''); 
-    
-    if (!value) {
-        e.target.value = '';
-        return;
-    }
-
-    let options = { minimumFractionDigits: 2, maximumFractionDigits: 2 };
-    let result = (parseInt(value, 10) / 100).toLocaleString('pt-BR', options);
-
-    e.target.value = result;
-});
-
-// Algoritmo CRC16 CCITT-FALSE Oficial
-function CRC16(str) {
-    let crc = 0xFFFF;
-    const encoder = new TextEncoder();
-    const bytes = encoder.encode(str);
-
-    for (let c = 0; c < bytes.length; c++) {
-        crc ^= bytes[c] << 8;
-        for (let i = 0; i < 8; i++) {
-            if ((crc & 0x8000) !== 0) {
-                crc = (crc << 1) ^ 0x1021;
-            } else {
-                crc = crc << 1;
-            }
-        }
-    }
-    return (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
-}
-
-// Formatação TLV calculada rigorosamente em Bytes UTF-8
-function formatField(id, value) {
-    const encoder = new TextEncoder();
-    const len = encoder.encode(value).length.toString().padStart(2, '0');
-    return id + len + value;
-}
-
-// Limpeza de Texto (ASCII sem acentos)
-function limparTexto(texto) {
-    if (!texto) return '';
-    let t = texto.replace(/&/g, 'E');
-    t = t.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    t = t.replace(/[^a-zA-Z0-9 ]/g, "");
-    return t.trim().toUpperCase();
-}
-
-// SANITIZAÇÃO RIGOROSA COM BASE NO TIPO SELECIONADO
-function tratarChavePixPorTipo(chaveBruta, tipo) {
-    if (!chaveBruta) return '';
-    let c = chaveBruta.trim();
-
-    if (tipo === 'EMAIL') {
-        return c.toLowerCase().trim();
-    }
-
-    if (tipo === 'EVP') {
-        return c.toLowerCase().trim();
-    }
-
-    let apenasNumeros = c.replace(/\D/g, '');
-
-    if (tipo === 'CPF') {
-        return apenasNumeros;
-    }
-
-    if (tipo === 'CNPJ') {
-        return apenasNumeros;
-    }
-
-    if (tipo === 'CELULAR') {
-        if (c.startsWith('+55')) {
-            return '+55' + apenasNumeros.substring(2);
-        }
-        if ((apenasNumeros.length === 12 || apenasNumeros.length === 13) && apenasNumeros.startsWith('55')) {
-            return '+' + apenasNumeros;
-        }
-        return '+55' + apenasNumeros;
-    }
-
-    return c;
-}
-
-function gerarPix() {
-    let tipo = document.getElementById('tipoChave').value;
-    let chaveBruta = document.getElementById('chave').value;
-    let nomeOriginal = document.getElementById('nome').value;
-    let cidadeOriginal = document.getElementById('cidade').value;
-    let valorInput = document.getElementById('valor').value;
-
-    let chave = tratarChavePixPorTipo(chaveBruta, tipo);
-    let nome = limparTexto(nomeOriginal).substring(0, 25);
-    let cidade = limparTexto(cidadeOriginal).substring(0, 15);
-
-    if (!chave || !nome || !cidade) {
-        alert('Por favor, preencha a chave Pix, o nome e a cidade.');
-        return;
-    }
-
-    let payload = formatField('00', '01') + formatField('01', '12');
-
-    let merchantAccount = formatField('00', 'BR.GOV.BCB.PIX') + formatField('01', chave);
-    payload += formatField('26', merchantAccount);
-
-    payload += formatField('52', '0000') + formatField('53', '986');
-
-    if (valorInput) {
-        let valorTratado = valorInput.replace(/\./g, '').replace(',', '.').trim();
-        let valorNum = parseFloat(valorTratado);
-        if (!isNaN(valorNum) && valorNum > 0) {
-            payload += formatField('54', valorNum.toFixed(2));
-        }
-    }
-
-    payload += formatField('58', 'BR') + 
-               formatField('59', nome) + 
-               formatField('60', cidade);
-
-    let txidField = formatField('05', '***');
-    payload += formatField('62', txidField);
-
-    payload += '6304';
-
-    const crc = CRC16(payload);
-    const pixCompleto = payload + crc;
-
-    document.getElementById('pix-payload').value = pixCompleto;
-    document.getElementById('qrcode-container').innerHTML = '';
-
-    new QRCode(document.getElementById('qrcode-container'), { 
-        text: pixCompleto, 
-        width: 180, 
-        height: 180,
-        correctLevel: QRCode.CorrectLevel.M
-    });
-
-    document.getElementById('result').style.display = 'block';
-}
-
-function mostrarToast(mensagem) {
-    const toast = document.getElementById('toast');
-    toast.innerText = mensagem || '✓ Concluído!';
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2200);
-}
-
-function mostrarAviso() {
-    const btn = document.getElementById('btn-copiar');
-    mostrarToast('✓ Código Pix copiado!');
-    btn.innerText = '✓ Código Copiado!';
-    btn.style.backgroundColor = '#06b6d4';
-    btn.style.color = '#0f172a';
-
-    setTimeout(function() {
-        btn.innerText = 'Copiar Código Pix';
-        btn.style.backgroundColor = '#2563eb';
-        btn.style.color = '#ffffff';
-    }, 2200);
-}
-
-function copiarPix() {
-    const payloadInput = document.getElementById('pix-payload');
-    const texto = payloadInput.value.trim();
-    if (!texto) return;
-
-    payloadInput.focus();
-    payloadInput.select();
-
-    if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(texto).then(() => mostrarAviso()).catch(() => {
-            document.execCommand('copy');
-            mostrarAviso();
+        keys.forEach(k => {
+          const opt = document.createElement('option');
+          opt.value = k.id;
+          const shortKey = k.key.length > 8 ? `...${k.key.slice(-4)}` : k.key;
+          opt.textContent = `${k.alias || 'Sem Nome'} (${shortKey})`;
+          select.appendChild(opt);
         });
-    } else {
-        document.execCommand('copy');
-        mostrarAviso();
+      };
     }
-}
 
-function enviarWhatsApp() {
-    const pixCode = document.getElementById('pix-payload').value.trim();
-    if (!pixCode) return;
-    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(pixCode)}`;
-    window.open(url, '_blank');
-}
-</script>
+    // Carregar Chave Selecionada
+    function loadSelectedKey() {
+      const id = document.getElementById('selectKey').value;
+      const btnDelete = document.getElementById('btnDeleteKey');
 
+      if (!id) {
+        document.getElementById('pixForm').reset();
+        btnDelete.classList.add('hidden');
+        return;
+      }
+
+      const tx = db.transaction('keys', 'readonly');
+      const store = tx.objectStore('keys');
+      const request = store.get(Number(id));
+
+      request.onsuccess = () => {
+        const data = request.result;
+        if (data) {
+          document.getElementById('keyAlias').value = data.alias || '';
+          document.getElementById('keyType').value = data.type || 'CPF';
+          document.getElementById('pixKey').value = data.key || '';
+          document.getElementById('merchantName').value = data.name || '';
+          document.getElementById('merchantCity').value = data.city || '';
+          btnDelete.classList.remove('hidden');
+        }
+      };
+    }
+
+    // Salvar/Atualizar Chave
+    function saveCurrentKey() {
+      const alias = document.getElementById('keyAlias').value.trim() || 'Chave Pix';
+      const type = document.getElementById('keyType').value;
+      const key = document.getElementById('pixKey').value.trim();
+      const name = document.getElementById('merchantName').value.trim();
+      const city = document.getElementById('merchantCity').value.trim();
+      const selectedId = document.getElementById('selectKey').value;
+
+      if (!key || !name || !city) {
+        showToast("Preencha Chave, Nome e Cidade para salvar.");
+        return;
+      }
+
+      const payloadData = { alias, type, key, name, city };
+      if (selectedId) payloadData.id = Number(selectedId);
+
+      const tx = db.transaction('keys', 'readwrite');
+      const store = tx.objectStore('keys');
+      const request = store.put(payloadData);
+
+      request.onsuccess = (e) => {
+        showToast("Chave salva com sucesso!");
+        populateKeysSelect();
+        setTimeout(() => {
+          document.getElementById('selectKey').value = selectedId || e.target.result;
+          loadSelectedKey();
+        }, 100);
+      };
+    }
+
+    // Excluir Chave
+    function deleteCurrentKey() {
+      const id = document.getElementById('selectKey').value;
+      if (!id) return;
+
+      if (confirm("Deseja excluir esta chave salva?")) {
+        const tx = db.transaction('keys', 'readwrite');
+        const store = tx.objectStore('keys');
+        store.delete(Number(id)).onsuccess = () => {
+          showToast("Chave excluída.");
+          document.getElementById('pixForm').reset();
+          document.getElementById('selectKey').value = "";
+          document.getElementById('btnDeleteKey').classList.add('hidden');
+          populateKeysSelect();
+        };
+      }
+    }
+
+    // Algoritmo CRC16
+    function crc16(str) {
+      let crc = 0xFFFF;
+      for (let i = 0; i < str.length; i++) {
+        crc ^= str.charCodeAt(i) << 8;
+        for (let j = 0; j < 8; j++) {
+          if ((crc & 0x8000) !== 0) {
+            crc = ((crc << 1) ^ 0x1021) & 0xFFFF;
+          } else {
+            crc = (crc << 1) & 0xFFFF;
+          }
+        }
+      }
+      return crc.toString(16).toUpperCase().padStart(4, '0');
+    }
+
+    function formatField(id, val) {
+      const len = val.length.toString().padStart(2, '0');
+      return `${id}${len}${val}`;
+    }
+
+    // Normalizador de Texto
+    function sanitizeText(str) {
+      return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().trim();
+    }
+
+    // Gerar Código Pix
+    function generatePix(e) {
+      e.preventDefault();
+
+      let key = document.getElementById('pixKey').value.trim();
+      let name = sanitizeText(document.getElementById('merchantName').value);
+      let city = sanitizeText(document.getElementById('merchantCity').value);
+      let amountVal = document.getElementById('txAmount').value;
+
+      const merchantAccountInfo = formatField('00', 'br.gov.bcb.pix') + formatField('01', key);
+      let payload = formatField('00', '01') +
+                    formatField('26', merchantAccountInfo) +
+                    formatField('52', '0000') +
+                    formatField('53', '986');
+
+      if (amountVal && parseFloat(amountVal) > 0) {
+        payload += formatField('54', parseFloat(amountVal).toFixed(2));
+      }
+
+      payload += formatField('58', 'BR') +
+                 formatField('59', name) +
+                 formatField('60', city) +
+                 formatField('62', formatField('05', '***')) +
+                 '6304';
+
+      payload += crc16(payload);
+
+      // Renderizar QR Code
+      const qrContainer = document.getElementById('qrcode');
+      qrContainer.innerHTML = '';
+      new QRCode(qrContainer, {
+        text: payload,
+        width: 180,
+        height: 180,
+        colorDark: "#0f172a",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+
+      document.getElementById('payloadText').value = payload;
+      document.getElementById('resultArea').classList.remove('hidden');
+      document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Copiar Payload
+    function copyPayload() {
+      const copyText = document.getElementById("payloadText");
+      copyText.select();
+      navigator.clipboard.writeText(copyText.value);
+      showToast("Código Copia e Cola copiado!");
+    }
+
+    // Compartilhar WhatsApp
+    function shareWhatsApp() {
+      const payload = document.getElementById("payloadText").value;
+      const amount = document.getElementById("txAmount").value;
+      let msg = `Olá! Segue o código Pix para pagamento:\n\n\`${payload}\``;
+      if (amount && parseFloat(amount) > 0) {
+        msg = `Olá! Segue o Pix no valor de *R$ ${parseFloat(amount).toFixed(2)}*:\n\n\`${payload}\``;
+      }
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    // Exibir Toast
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 2500);
+    }
+
+    // Inicializar App e PWA
+    window.onload = () => {
+      initDB();
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW falhou:', err));
+      }
+    };
+  </script>
 </body>
 </html>
