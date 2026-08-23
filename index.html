@@ -65,6 +65,20 @@
             box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.18);
         }
 
+        .favoritos-box {
+            background: #f0f9ff;
+            border: 2px dashed #06b6d4;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+
+        .btn-group-fav {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
         button { 
             width: 100%; 
             padding: 14px; 
@@ -74,12 +88,29 @@
             border-radius: 10px; 
             font-size: 16px; 
             font-weight: bold; 
-            margin-top: 20px; 
+            margin-top: 15px; 
             cursor: pointer; 
             transition: background 0.2s, transform 0.1s, color 0.2s;
         }
         button:hover { background-color: #1d4ed8; }
         button:active { transform: scale(0.99); }
+
+        .btn-secundario {
+            background-color: #0284c7;
+            padding: 10px;
+            font-size: 14px;
+            margin-top: 0;
+        }
+        .btn-secundario:hover { background-color: #0369a1; }
+
+        .btn-danger {
+            background-color: #ef4444;
+            padding: 10px;
+            font-size: 14px;
+            margin-top: 0;
+            width: 40%;
+        }
+        .btn-danger:hover { background-color: #dc2626; }
         
         .btn-whatsapp { background-color: #25d366; color: white; margin-top: 10px; }
         .btn-whatsapp:hover { background-color: #1eb954; }
@@ -138,6 +169,23 @@
 <div class="container">
     <h1>Qr<span class="pix-color">Pix</span></h1>
 
+    <!-- GERENCIADOR DE FAVORITOS / MULTIPLAS CHAVES -->
+    <div class="favoritos-box">
+        <label for="selectFavoritos" style="margin-top: 0;">Minhas Chaves Salvas:</label>
+        <select id="selectFavoritos" onchange="carregarChaveSelecionada()">
+            <option value="">-- Nova / Digitação Manual --</option>
+        </select>
+
+        <div id="divApelido" style="margin-top: 8px;">
+            <input type="text" id="apelidoChave" placeholder="Apelido desta chave (Ex: Minha Loja, Itaú, etc)">
+        </div>
+
+        <div class="btn-group-fav">
+            <button type="button" class="btn-secundario" onclick="salvarChaveFavorita()">★ Salvar / Atualizar Chave</button>
+            <button type="button" id="btnExcluirFav" class="btn-danger" style="display: none;" onclick="excluirChaveFavorita()">Excluir</button>
+        </div>
+    </div>
+
     <label for="tipoChave">Tipo de Chave Pix:</label>
     <select id="tipoChave" onchange="alterarTipoChave()">
         <option value="CELULAR">Celular</option>
@@ -180,14 +228,18 @@
 // --- BANCO DE DADOS PERSISTENTE ---
 let db;
 const dbName = "QrPixDatabase_TESTE";
+let listaChavesSalvas = [];
 
 function iniciarBanco() {
     return new Promise((resolve) => {
-        const request = indexedDB.open(dbName, 1);
+        const request = indexedDB.open(dbName, 2); // Versão incrementada para schema de chaves
         request.onupgradeneeded = function(e) {
             let db = e.target.result;
             if (!db.objectStoreNames.contains("dados")) {
                 db.createObjectStore("dados", { keyPath: "campo" });
+            }
+            if (!db.objectStoreNames.contains("chaves")) {
+                db.createObjectStore("chaves", { keyPath: "id" });
             }
         };
         request.onsuccess = function(e) {
@@ -212,6 +264,142 @@ function salvarDado(campo, valor) {
     }
 }
 
+// GERENCIAMENTO DE MÚLTIPLAS CHAVES SALVAS
+async function carregarChavesFavoritas() {
+    let salvas = localStorage.getItem('pix_teste_chaves_lista');
+    if (salvas) {
+        try { listaChavesSalvas = JSON.parse(salvas); } catch(e) { listaChavesSalvas = []; }
+    }
+
+    if (db && listaChavesSalvas.length === 0) {
+        try {
+            const tx = db.transaction("chaves", "readonly");
+            const store = tx.objectStore("chaves");
+            const req = store.getAll();
+            req.onsuccess = () => {
+                if (req.result && req.result.length > 0) {
+                    listaChavesSalvas = req.result;
+                    atualizarSelectFavoritos();
+                }
+            };
+        } catch (e) {}
+    } else {
+        atualizarSelectFavoritos();
+    }
+}
+
+function atualizarSelectFavoritos() {
+    const select = document.getElementById('selectFavoritos');
+    select.innerHTML = '<option value="">-- Nova / Digitação Manual --</option>';
+
+    listaChavesSalvas.forEach((item, index) => {
+        let opt = document.createElement('option');
+        opt.value = index;
+        opt.innerText = item.apelido || item.chave;
+        select.appendChild(opt);
+    });
+}
+
+function salvarChaveFavorita() {
+    let apelido = document.getElementById('apelidoChave').value.trim();
+    let tipo = document.getElementById('tipoChave').value;
+    let chave = document.getElementById('chave').value.trim();
+    let nome = document.getElementById('nome').value.trim();
+    let cidade = document.getElementById('cidade').value.trim();
+
+    if (!chave || !nome || !cidade) {
+        alert('Preencha pelo menos a Chave, Nome e Cidade para salvar como favorita.');
+        return;
+    }
+
+    if (!apelido) {
+        apelido = chave;
+    }
+
+    let selectedIndex = document.getElementById('selectFavoritos').value;
+    let itemData = {
+        id: selectedIndex !== "" ? listaChavesSalvas[selectedIndex].id : Date.now().toString(),
+        apelido: apelido,
+        tipo: tipo,
+        chave: chave,
+        nome: nome,
+        cidade: cidade
+    };
+
+    if (selectedIndex !== "") {
+        listaChavesSalvas[selectedIndex] = itemData;
+    } else {
+        listaChavesSalvas.push(itemData);
+    }
+
+    // Persistir em localStorage e IndexedDB
+    localStorage.setItem('pix_teste_chaves_lista', JSON.stringify(listaChavesSalvas));
+    if (db) {
+        try {
+            const tx = db.transaction("chaves", "readwrite");
+            const store = tx.objectStore("chaves");
+            store.put(itemData);
+        } catch(e) {}
+    }
+
+    atualizarSelectFavoritos();
+    document.getElementById('selectFavoritos').value = selectedIndex !== "" ? selectedIndex : (listaChavesSalvas.length - 1);
+    carregarChaveSelecionada();
+    mostrarToast("Chave salva com sucesso!");
+}
+
+function carregarChaveSelecionada() {
+    let index = document.getElementById('selectFavoritos').value;
+    let btnExcluir = document.getElementById('btnExcluirFav');
+
+    if (index === "") {
+        btnExcluir.style.display = 'none';
+        document.getElementById('apelidoChave').value = '';
+        return;
+    }
+
+    let item = listaChavesSalvas[index];
+    if (item) {
+        document.getElementById('apelidoChave').value = item.apelido || '';
+        document.getElementById('tipoChave').value = item.tipo;
+        alterarTipoChave();
+        document.getElementById('chave').value = item.chave;
+        document.getElementById('nome').value = item.nome;
+        document.getElementById('cidade').value = item.cidade;
+
+        salvarDado('tipoChave', item.tipo);
+        salvarDado('chave', item.chave);
+        salvarDado('nome', item.nome);
+        salvarDado('cidade', item.cidade);
+
+        btnExcluir.style.display = 'block';
+    }
+}
+
+function excluirChaveFavorita() {
+    let index = document.getElementById('selectFavoritos').value;
+    if (index === "") return;
+
+    let item = listaChavesSalvas[index];
+    if (confirm(`Deseja realmente remover a chave "${item.apelido || item.chave}"?`)) {
+        listaChavesSalvas.splice(index, 1);
+        localStorage.setItem('pix_teste_chaves_lista', JSON.stringify(listaChavesSalvas));
+
+        if (db && item.id) {
+            try {
+                const tx = db.transaction("chaves", "readwrite");
+                const store = tx.objectStore("chaves");
+                store.delete(item.id);
+            } catch(e) {}
+        }
+
+        atualizarSelectFavoritos();
+        document.getElementById('selectFavoritos').value = "";
+        carregarChaveSelecionada();
+        mostrarToast("Chave removida!");
+    }
+}
+
 function carregarDados() {
     let tipo = localStorage.getItem('pix_teste_tipoChave');
     let chave = localStorage.getItem('pix_teste_chave');
@@ -224,38 +412,6 @@ function carregarDados() {
     if (chave) document.getElementById('chave').value = chave;
     if (nome) document.getElementById('nome').value = nome;
     if (cidade) document.getElementById('cidade').value = cidade;
-
-    if (db && (!chave || !nome || !cidade)) {
-        try {
-            const tx = db.transaction("dados", "readonly");
-            const store = tx.objectStore("dados");
-            
-            store.get("tipoChave").onsuccess = (e) => {
-                if (e.target.result && !document.getElementById('tipoChave').value) {
-                    document.getElementById('tipoChave').value = e.target.result.valor;
-                    alterarTipoChave();
-                }
-            };
-            store.get("chave").onsuccess = (e) => {
-                if (e.target.result && !document.getElementById('chave').value) {
-                    document.getElementById('chave').value = e.target.result.valor;
-                    localStorage.setItem('pix_teste_chave', e.target.result.valor);
-                }
-            };
-            store.get("nome").onsuccess = (e) => {
-                if (e.target.result && !document.getElementById('nome').value) {
-                    document.getElementById('nome').value = e.target.result.valor;
-                    localStorage.setItem('pix_teste_nome', e.target.result.valor);
-                }
-            };
-            store.get("cidade").onsuccess = (e) => {
-                if (e.target.result && !document.getElementById('cidade').value) {
-                    document.getElementById('cidade').value = e.target.result.valor;
-                    localStorage.setItem('pix_teste_cidade', e.target.result.valor);
-                }
-            };
-        } catch (err) {}
-    }
 }
 
 function alterarTipoChave() {
@@ -286,6 +442,7 @@ function alterarTipoChave() {
 document.addEventListener('DOMContentLoaded', async function() {
     await iniciarBanco();
     carregarDados();
+    await carregarChavesFavoritas();
 
     if (navigator.storage && navigator.storage.persist) {
         navigator.storage.persist();
@@ -322,14 +479,13 @@ document.getElementById('btn-instalar').addEventListener('click', (e) => {
 
 // MÁSCARA DE MOEDA CORRIGIDA E COMPATÍVEL COM PWA MÓVEL
 document.getElementById('valor').addEventListener('input', function(e) {
-    let value = e.target.value.replace(/\D/g, ''); // Isolamento estrito de dígitos
+    let value = e.target.value.replace(/\D/g, ''); 
     
     if (!value) {
         e.target.value = '';
         return;
     }
 
-    // Converte centavos para formato pt-BR
     let options = { minimumFractionDigits: 2, maximumFractionDigits: 2 };
     let result = (parseInt(value, 10) / 100).toLocaleString('pt-BR', options);
 
@@ -395,7 +551,6 @@ function tratarChavePixPorTipo(chaveBruta, tipo) {
     }
 
     if (tipo === 'CELULAR') {
-        // Padrão Internacional E.164 exigido pelo Banco Central (+55)
         if (c.startsWith('+55')) {
             return '+55' + apenasNumeros.substring(2);
         }
@@ -424,18 +579,13 @@ function gerarPix() {
         return;
     }
 
-    // 00: Format Indicator
-    // 01: Initiation Method (12 = Estático/Reutilizável)
     let payload = formatField('00', '01') + formatField('01', '12');
 
-    // 26: Informações do Recebedor (Chave)
     let merchantAccount = formatField('00', 'BR.GOV.BCB.PIX') + formatField('01', chave);
     payload += formatField('26', merchantAccount);
 
-    // 52: Categoria, 53: Moeda (986 = BRL)
     payload += formatField('52', '0000') + formatField('53', '986');
 
-    // 54: Valor (Opcional - Tratamento de valor formatado pt-BR)
     if (valorInput) {
         let valorTratado = valorInput.replace(/\./g, '').replace(',', '.').trim();
         let valorNum = parseFloat(valorTratado);
@@ -444,16 +594,13 @@ function gerarPix() {
         }
     }
 
-    // 58: País, 59: Nome, 60: Cidade
     payload += formatField('58', 'BR') + 
                formatField('59', nome) + 
                formatField('60', cidade);
 
-    // 62: TXID Padrão
     let txidField = formatField('05', '***');
     payload += formatField('62', txidField);
 
-    // 63: CRC16
     payload += '6304';
 
     const crc = CRC16(payload);
@@ -472,17 +619,21 @@ function gerarPix() {
     document.getElementById('result').style.display = 'block';
 }
 
-function mostrarAviso() {
+function mostrarToast(mensagem) {
     const toast = document.getElementById('toast');
-    const btn = document.getElementById('btn-copiar');
-    
+    toast.innerText = mensagem || '✓ Concluído!';
     toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+function mostrarAviso() {
+    const btn = document.getElementById('btn-copiar');
+    mostrarToast('✓ Código Pix copiado!');
     btn.innerText = '✓ Código Copiado!';
     btn.style.backgroundColor = '#06b6d4';
     btn.style.color = '#0f172a';
 
     setTimeout(function() {
-        toast.classList.remove('show');
         btn.innerText = 'Copiar Código Pix';
         btn.style.backgroundColor = '#2563eb';
         btn.style.color = '#ffffff';
