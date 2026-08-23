@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QrPix (Ambiente de Testes)</title>
+    
+    <!-- Configurações PWA -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="icon" type="image/svg+xml" href="./icon.svg?v=2">
+
+    <!-- Biblioteca QR Code -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+        
+        body { 
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); 
+            padding: 20px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .container { 
+            background: #ffffff; 
+            padding: 25px; 
+            border-radius: 20px; 
+            max-width: 450px; 
+            width: 100%; 
+            box-shadow: 0 12px 30px rgba(37, 99, 235, 0.12); 
+            border: 1px solid #bfdbfe;
+        }
+        
+        h1 { 
+            font-size: 30px; 
+            font-weight: 800; 
+            color: #1e3a8a; 
+            margin-bottom: 20px; 
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+        .pix-color { color: #06b6d4; }
+
+        label { font-size: 14px; font-weight: 700; color: #1e3a8a; display: block; margin-top: 14px; }
+        
+        input, select { 
+            width: 100%; 
+            padding: 12px; 
+            margin-top: 6px; 
+            border: 2px solid #bfdbfe; 
+            border-radius: 10px; 
+            font-size: 16px; 
+            background: #f8fafc; 
+            color: #1e293b;
+            transition: all 0.2s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #2563eb;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.18);
+        }
+
+        button { 
+            width: 100%; 
+            padding: 14px; 
+            background-color: #2563eb; 
+            color: white; 
+            border: none; 
+            border-radius: 10px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            margin-top: 20px; 
+            cursor: pointer; 
+            transition: background 0.2s, transform 0.1s, color 0.2s;
+        }
+        button:hover { background-color: #1d4ed8; }
+        button:active { transform: scale(0.99); }
+        
+        .btn-whatsapp { background-color: #25d366; color: white; margin-top: 10px; }
+        .btn-whatsapp:hover { background-color: #1eb954; }
+        
+        #btn-instalar { background-color: #0f172a; color: white; display: none; }
+        #btn-instalar:hover { background-color: #1e293b; }
+        
+        #qrcode-container { 
+            margin-top: 20px; 
+            display: flex; 
+            justify-content: center; 
+            background: #ffffff; 
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px dashed #38bdf8;
+        }
+        
+        .result-box { display: none; margin-top: 20px; }
+        
+        textarea { 
+            width: 100%; 
+            height: 85px; 
+            margin-top: 8px; 
+            padding: 10px; 
+            border-radius: 10px; 
+            border: 2px solid #bfdbfe; 
+            font-family: monospace; 
+            font-size: 12px; 
+            resize: none; 
+            background: #f8fafc; 
+            color: #1e3a8a;
+        }
+
+        .toast {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #06b6d4;
+            color: #0f172a;
+            padding: 14px 24px;
+            border-radius: 30px;
+            font-weight: 800;
+            font-size: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+            z-index: 9999;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .toast.show { display: block; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Qr<span class="pix-color">Pix</span></h1>
+
+    <label for="tipoChave">Tipo de Chave Pix:</label>
+    <select id="tipoChave" onchange="alterarTipoChave()">
+        <option value="CELULAR">Celular</option>
+        <option value="CPF">CPF</option>
+        <option value="CNPJ">CNPJ</option>
+        <option value="EMAIL">E-mail</option>
+        <option value="EVP">Chave Aleatória (EVP)</option>
+    </select>
+
+    <label for="chave" id="labelChave">Chave Pix (DDD + Número):</label>
+    <input type="text" id="chave" placeholder="(00) 00000-0000">
+
+    <label for="nome">Nome do Recebedor:</label>
+    <input type="text" id="nome" placeholder="Seu Nome ou Razão Social">
+
+    <label for="cidade">Cidade:</label>
+    <input type="text" id="cidade" placeholder="Sua Cidade">
+
+    <label for="valor">Valor (R$) (Opcional):</label>
+    <input type="text" id="valor" placeholder="0,00" inputmode="numeric">
+
+    <button type="button" onclick="gerarPix()">Gerar QR Code</button>
+
+    <button type="button" id="btn-instalar">Instalar App no Celular</button>
+
+    <div id="result" class="result-box">
+        <div id="qrcode-container"></div>
+        
+        <label for="pix-payload">Código Pix Copia e Cola:</label>
+        <textarea id="pix-payload" readonly></textarea>
+        
+        <button type="button" id="btn-copiar" onclick="copiarPix()">Copiar Código Pix</button>
+        <button type="button" class="btn-whatsapp" onclick="enviarWhatsApp()">Enviar no WhatsApp</button>
+    </div>
+</div>
+
+<div id="toast" class="toast">✓ Código Pix copiado!</div>
+
+<script>
+// --- BANCO DE DADOS PERSISTENTE ---
+let db;
+const dbName = "QrPixDatabase_TESTE";
+
+function iniciarBanco() {
+    return new Promise((resolve) => {
+        const request = indexedDB.open(dbName, 1);
+        request.onupgradeneeded = function(e) {
+            let db = e.target.result;
+            if (!db.objectStoreNames.contains("dados")) {
+                db.createObjectStore("dados", { keyPath: "campo" });
+            }
+        };
+        request.onsuccess = function(e) {
+            db = e.target.result;
+            resolve();
+        };
+        request.onerror = function() {
+            resolve();
+        };
+    });
+}
+
+function salvarDado(campo, valor) {
+    localStorage.setItem('pix_teste_' + campo, valor);
+
+    if (db) {
+        try {
+            const tx = db.transaction("dados", "readwrite");
+            const store = tx.objectStore("dados");
+            store.put({ campo: campo, valor: valor });
+        } catch (err) {}
+    }
+}
+
+function carregarDados() {
+    let tipo = localStorage.getItem('pix_teste_tipoChave');
+    let chave = localStorage.getItem('pix_teste_chave');
+    let nome = localStorage.getItem('pix_teste_nome');
+    let cidade = localStorage.getItem('pix_teste_cidade');
+
+    if (tipo) document.getElementById('tipoChave').value = tipo;
+    alterarTipoChave();
+
+    if (chave) document.getElementById('chave').value = chave;
+    if (nome) document.getElementById('nome').value = nome;
+    if (cidade) document.getElementById('cidade').value = cidade;
+
+    if (db && (!chave || !nome || !cidade)) {
+        try {
+            const tx = db.transaction("dados", "readonly");
+            const store = tx.objectStore("dados");
+            
+            store.get("tipoChave").onsuccess = (e) => {
+                if (e.target.result && !document.getElementById('tipoChave').value) {
+                    document.getElementById('tipoChave').value = e.target.result.valor;
+                    alterarTipoChave();
+                }
+            };
+            store.get("chave").onsuccess = (e) => {
+                if (e.target.result && !document.getElementById('chave').value) {
+                    document.getElementById('chave').value = e.target.result.valor;
+                    localStorage.setItem('pix_teste_chave', e.target.result.valor);
+                }
+            };
+            store.get("nome").onsuccess = (e) => {
+                if (e.target.result && !document.getElementById('nome').value) {
+                    document.getElementById('nome').value = e.target.result.valor;
+                    localStorage.setItem('pix_teste_nome', e.target.result.valor);
+                }
+            };
+            store.get("cidade").onsuccess = (e) => {
+                if (e.target.result && !document.getElementById('cidade').value) {
+                    document.getElementById('cidade').value = e.target.result.valor;
+                    localStorage.setItem('pix_teste_cidade', e.target.result.valor);
+                }
+            };
+        } catch (err) {}
+    }
+}
+
+function alterarTipoChave() {
+    const tipo = document.getElementById('tipoChave').value;
+    const label = document.getElementById('labelChave');
+    const input = document.getElementById('chave');
+
+    salvarDado('tipoChave', tipo);
+
+    if (tipo === 'CELULAR') {
+        label.innerText = 'Chave Pix (DDD + Número):';
+        input.placeholder = '(00) 00000-0000';
+    } else if (tipo === 'CPF') {
+        label.innerText = 'Chave Pix (CPF):';
+        input.placeholder = '000.000.000-00';
+    } else if (tipo === 'CNPJ') {
+        label.innerText = 'Chave Pix (CNPJ):';
+        input.placeholder = '00.000.000/0001-00';
+    } else if (tipo === 'EMAIL') {
+        label.innerText = 'Chave Pix (E-mail):';
+        input.placeholder = 'seuemail@exemplo.com';
+    } else if (tipo === 'EVP') {
+        label.innerText = 'Chave Aleatória (EVP):';
+        input.placeholder = '00000000-0000-0000-0000-000000000000';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', async function() {
+    await iniciarBanco();
+    carregarDados();
+
+    if (navigator.storage && navigator.storage.persist) {
+        navigator.storage.persist();
+    }
+
+    document.getElementById('chave').addEventListener('input', (e) => salvarDado('chave', e.target.value));
+    document.getElementById('nome').addEventListener('input', (e) => salvarDado('nome', e.target.value));
+    document.getElementById('cidade').addEventListener('input', (e) => salvarDado('cidade', e.target.value));
+
+    document.getElementById('pix-payload').addEventListener('click', function() { copiarPix(); });
+});
+
+// Service Worker
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('./sw.js').catch(function(err) {});
+    });
+}
+
+// Instalação PWA
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById('btn-instalar').style.display = 'block';
+});
+
+document.getElementById('btn-instalar').addEventListener('click', (e) => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+    }
+});
+
+// MÁSCARA DE MOEDA CORRIGIDA E COMPATÍVEL COM PWA MÓVEL
+document.getElementById('valor').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, ''); // Isolamento estrito de dígitos
+    
+    if (!value) {
+        e.target.value = '';
+        return;
+    }
+
+    // Converte centavos para formato pt-BR
+    let options = { minimumFractionDigits: 2, maximumFractionDigits: 2 };
+    let result = (parseInt(value, 10) / 100).toLocaleString('pt-BR', options);
+
+    e.target.value = result;
+});
+
+// Algoritmo CRC16 CCITT-FALSE Oficial
+function CRC16(str) {
+    let crc = 0xFFFF;
+    const encoder = new TextEncoder();
+    const bytes = encoder.encode(str);
+
+    for (let c = 0; c < bytes.length; c++) {
+        crc ^= bytes[c] << 8;
+        for (let i = 0; i < 8; i++) {
+            if ((crc & 0x8000) !== 0) {
+                crc = (crc << 1) ^ 0x1021;
+            } else {
+                crc = crc << 1;
+            }
+        }
+    }
+    return (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
+}
+
+// Formatação TLV calculada rigorosamente em Bytes UTF-8
+function formatField(id, value) {
+    const encoder = new TextEncoder();
+    const len = encoder.encode(value).length.toString().padStart(2, '0');
+    return id + len + value;
+}
+
+// Limpeza de Texto (ASCII sem acentos)
+function limparTexto(texto) {
+    if (!texto) return '';
+    let t = texto.replace(/&/g, 'E');
+    t = t.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    t = t.replace(/[^a-zA-Z0-9 ]/g, "");
+    return t.trim().toUpperCase();
+}
+
+// SANITIZAÇÃO RIGOROSA COM BASE NO TIPO SELECIONADO
+function tratarChavePixPorTipo(chaveBruta, tipo) {
+    if (!chaveBruta) return '';
+    let c = chaveBruta.trim();
+
+    if (tipo === 'EMAIL') {
+        return c.toLowerCase().trim();
+    }
+
+    if (tipo === 'EVP') {
+        return c.toLowerCase().trim();
+    }
+
+    let apenasNumeros = c.replace(/\D/g, '');
+
+    if (tipo === 'CPF') {
+        return apenasNumeros;
+    }
+
+    if (tipo === 'CNPJ') {
+        return apenasNumeros;
+    }
+
+    if (tipo === 'CELULAR') {
+        // Padrão Internacional E.164 exigido pelo Banco Central (+55)
+        if (c.startsWith('+55')) {
+            return '+55' + apenasNumeros.substring(2);
+        }
+        if ((apenasNumeros.length === 12 || apenasNumeros.length === 13) && apenasNumeros.startsWith('55')) {
+            return '+' + apenasNumeros;
+        }
+        return '+55' + apenasNumeros;
+    }
+
+    return c;
+}
+
+function gerarPix() {
+    let tipo = document.getElementById('tipoChave').value;
+    let chaveBruta = document.getElementById('chave').value;
+    let nomeOriginal = document.getElementById('nome').value;
+    let cidadeOriginal = document.getElementById('cidade').value;
+    let valorInput = document.getElementById('valor').value;
+
+    let chave = tratarChavePixPorTipo(chaveBruta, tipo);
+    let nome = limparTexto(nomeOriginal).substring(0, 25);
+    let cidade = limparTexto(cidadeOriginal).substring(0, 15);
+
+    if (!chave || !nome || !cidade) {
+        alert('Por favor, preencha a chave Pix, o nome e a cidade.');
+        return;
+    }
+
+    // 00: Format Indicator
+    // 01: Initiation Method (12 = Estático/Reutilizável)
+    let payload = formatField('00', '01') + formatField('01', '12');
+
+    // 26: Informações do Recebedor (Chave)
+    let merchantAccount = formatField('00', 'BR.GOV.BCB.PIX') + formatField('01', chave);
+    payload += formatField('26', merchantAccount);
+
+    // 52: Categoria, 53: Moeda (986 = BRL)
+    payload += formatField('52', '0000') + formatField('53', '986');
+
+    // 54: Valor (Opcional - Tratamento de valor formatado pt-BR)
+    if (valorInput) {
+        let valorTratado = valorInput.replace(/\./g, '').replace(',', '.').trim();
+        let valorNum = parseFloat(valorTratado);
+        if (!isNaN(valorNum) && valorNum > 0) {
+            payload += formatField('54', valorNum.toFixed(2));
+        }
+    }
+
+    // 58: País, 59: Nome, 60: Cidade
+    payload += formatField('58', 'BR') + 
+               formatField('59', nome) + 
+               formatField('60', cidade);
+
+    // 62: TXID Padrão
+    let txidField = formatField('05', '***');
+    payload += formatField('62', txidField);
+
+    // 63: CRC16
+    payload += '6304';
+
+    const crc = CRC16(payload);
+    const pixCompleto = payload + crc;
+
+    document.getElementById('pix-payload').value = pixCompleto;
+    document.getElementById('qrcode-container').innerHTML = '';
+
+    new QRCode(document.getElementById('qrcode-container'), { 
+        text: pixCompleto, 
+        width: 180, 
+        height: 180,
+        correctLevel: QRCode.CorrectLevel.M
+    });
+
+    document.getElementById('result').style.display = 'block';
+}
+
+function mostrarAviso() {
+    const toast = document.getElementById('toast');
+    const btn = document.getElementById('btn-copiar');
+    
+    toast.classList.add('show');
+    btn.innerText = '✓ Código Copiado!';
+    btn.style.backgroundColor = '#06b6d4';
+    btn.style.color = '#0f172a';
+
+    setTimeout(function() {
+        toast.classList.remove('show');
+        btn.innerText = 'Copiar Código Pix';
+        btn.style.backgroundColor = '#2563eb';
+        btn.style.color = '#ffffff';
+    }, 2200);
+}
+
+function copiarPix() {
+    const payloadInput = document.getElementById('pix-payload');
+    const texto = payloadInput.value.trim();
+    if (!texto) return;
+
+    payloadInput.focus();
+    payloadInput.select();
+
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(texto).then(() => mostrarAviso()).catch(() => {
+            document.execCommand('copy');
+            mostrarAviso();
+        });
+    } else {
+        document.execCommand('copy');
+        mostrarAviso();
+    }
+}
+
+function enviarWhatsApp() {
+    const pixCode = document.getElementById('pix-payload').value.trim();
+    if (!pixCode) return;
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(pixCode)}`;
+    window.open(url, '_blank');
+}
+</script>
+
+</body>
+</html>

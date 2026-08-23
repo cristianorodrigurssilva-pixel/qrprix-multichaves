@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Fundo Azul Tecnológico Profundo -->
+    <linearGradient id="bgOrigami" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E3A8A" />
+      <stop offset="100%" stop-color="#0F172A" />
+    </linearGradient>
+
+    <!-- Sombras 3D das Dobras -->
+    <filter id="shadowOrigami" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="4" dy="8" stdDeviation="6" flood-color="#000000" flood-opacity="0.5" />
+    </filter>
+  </defs>
+
+  <!-- Fundo do Ícone -->
+  <rect width="512" height="512" rx="110" fill="url(#bgOrigami)" />
+
+  <!-- Moldura Estilizada de QR Code -->
+  <path d="M 120 170 V 130 H 170" stroke="#06B6D4" stroke-width="10" stroke-linecap="round" fill="none" />
+  <path d="M 342 130 H 392 V 170" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none" />
+  <path d="M 120 290 V 330 H 170" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none" />
+
+  <!-- Símbolo Pix em estilo Dobradura 3D -->
+  <g transform="translate(256, 215)" filter="url(#shadowOrigami)">
+    <!-- Losango Topo (Ciano Claro / Azul Celeste) -->
+    <polygon points="0,-70 32,-38 0,-6 -32,-38" fill="#38BDF8" />
+    <!-- Sombra da dobra do topo -->
+    <polygon points="0,-70 32,-38 0,-6" fill="#000000" opacity="0.18" />
+
+    <!-- Losango Direita (Ciano Neon Pix) -->
+    <polygon points="64,-6 96,26 64,58 32,26" fill="#06B6D4" />
+    <polygon points="64,-6 96,26 64,58" fill="#000000" opacity="0.18" />
+
+    <!-- Losango Baixo (Azul Royal Tecnológico) -->
+    <polygon points="0,26 32,58 0,90 -32,58" fill="#2563EB" />
+    <polygon points="0,26 32,58 0,90" fill="#000000" opacity="0.18" />
+
+    <!-- Losango Esquerda (Azul Marinho Vivo) -->
+    <polygon points="-64,-6 -32,26 -64,58 -96,26" fill="#1D4ED8" />
+    <polygon points="-64,-6 -32,26 -64,58" fill="#000000" opacity="0.18" />
+
+    <!-- Núcleo Conector Central (Branco) -->
+    <polygon points="0,-18 18,0 0,18 -18,0" fill="#FFFFFF" />
+  </g>
+
+  <!-- Nome QrPix com estilo Tipográfico Artístico -->
+  <text x="50%" y="435" font-family="'Trebuchet MS', 'Segoe UI', sans-serif" font-weight="900" font-size="52" fill="#FFFFFF" text-anchor="middle" letter-spacing="2">
+    Qr<tspan fill="#06B6D4">Pix</tspan>
+  </text>
+
+  <!-- Detalhe de Ponto Flutuante (Pixel de QR) -->
+  <circle cx="365" cy="325" r="8" fill="#06B6D4" filter="url(#shadowOrigami)" />
+</svg>
