@@ -3,113 +3,117 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QrPix Pro</title>
+  <title>QrPix</title>
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#2563eb">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    body {
+      background: linear-gradient(180deg, #eef5ff 0%, #dbeafe 100%);
+    }
+  </style>
 </head>
-<body class="bg-slate-100 min-h-screen flex flex-col items-center p-4 text-slate-800">
+<body class="min-h-screen flex flex-col items-center justify-center p-4 text-slate-800">
 
-  <main class="w-full max-w-md bg-white rounded-2xl shadow-lg p-6 my-auto border border-slate-200">
+  <main class="w-full max-w-md bg-white rounded-3xl shadow-xl p-6 my-auto border border-blue-100">
+    <!-- Header Exato -->
     <header class="text-center mb-6">
-      <h1 class="text-2xl font-bold text-blue-600 flex items-center justify-center gap-2">
-        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
-        QrPix Pro
+      <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">
+        Qr<span class="text-cyan-500">Pix</span>
       </h1>
-      <p class="text-xs text-slate-500 mt-1">Gerador de QR Code Pix</p>
     </header>
 
     <!-- Formulário Principal -->
     <form id="pixForm" onsubmit="generatePix(event)" class="space-y-4">
       
-      <!-- Seletor de Chaves Salvas -->
+      <!-- Chaves Salvas -->
       <div>
-        <label for="selectKey" class="block text-xs font-semibold text-slate-600 mb-1">Minhas Chaves Salvas:</label>
-        <select id="selectKey" onchange="loadSelectedKey()" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-700 font-medium focus:ring-2 focus:ring-blue-500 outline-none">
+        <label for="selectKey" class="block text-xs font-bold text-slate-700 mb-1">Minhas Chaves Salvas:</label>
+        <select id="selectKey" onchange="loadSelectedKey()" class="w-full p-3 bg-slate-50 border border-blue-200 rounded-xl text-sm text-slate-700 font-medium focus:ring-2 focus:ring-blue-500 outline-none transition">
           <option value="">-- Nova Chave / Selecione --</option>
         </select>
       </div>
 
-      <!-- Apelido da Chave -->
+      <!-- Apelido da Chave (Opcional) -->
+      <div id="aliasContainer">
+        <label for="keyAlias" class="block text-xs font-bold text-slate-700 mb-1">Apelido da Chave (para salvar):</label>
+        <input type="text" id="keyAlias" placeholder="Ex: Meu Nubank, Loja" class="w-full p-3 border border-blue-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-700 placeholder-slate-400">
+      </div>
+
+      <!-- Tipo de Chave Pix -->
       <div>
-        <label for="keyAlias" class="block text-xs font-semibold text-slate-600 mb-1">Apelido da Chave:</label>
-        <input type="text" id="keyAlias" placeholder="Ex: Mercado Pago, Nubank" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+        <label for="keyType" class="block text-xs font-bold text-slate-700 mb-1">Tipo de Chave Pix:</label>
+        <select id="keyType" onchange="updateKeyPlaceholder()" class="w-full p-3 border border-blue-200 rounded-xl text-sm text-slate-700 font-medium focus:ring-2 focus:ring-blue-500 outline-none transition">
+          <option value="PHONE">Celular</option>
+          <option value="CPF">CPF</option>
+          <option value="CNPJ">CNPJ</option>
+          <option value="EMAIL">E-mail</option>
+          <option value="EVP">Aleatória (EVP)</option>
+        </select>
       </div>
 
-      <!-- Tipo e Chave -->
-      <div class="grid grid-cols-3 gap-2">
-        <div class="col-span-1">
-          <label for="keyType" class="block text-xs font-semibold text-slate-600 mb-1">Tipo:</label>
-          <select id="keyType" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-            <option value="CPF">CPF</option>
-            <option value="CNPJ">CNPJ</option>
-            <option value="PHONE">Celular</option>
-            <option value="EMAIL">E-mail</option>
-            <option value="EVP">Aleatória</option>
-          </select>
-        </div>
-        <div class="col-span-2">
-          <label for="pixKey" class="block text-xs font-semibold text-slate-600 mb-1">Chave Pix:</label>
-          <input type="text" id="pixKey" required placeholder="Digite a chave" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-        </div>
-      </div>
-
-      <!-- Recebedor -->
+      <!-- Chave Pix -->
       <div>
-        <label for="merchantName" class="block text-xs font-semibold text-slate-600 mb-1">Nome do Recebedor:</label>
-        <input type="text" id="merchantName" required maxlength="25" placeholder="Nome completo ou empresa" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+        <label id="lblPixKey" for="pixKey" class="block text-xs font-bold text-slate-700 mb-1">Chave Pix (DDD + Número):</label>
+        <input type="text" id="pixKey" required placeholder="(00) 00000-0000" class="w-full p-3 border border-blue-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-700 placeholder-slate-400">
       </div>
 
-      <!-- Cidade e Valor -->
-      <div class="grid grid-cols-2 gap-2">
-        <div>
-          <label for="merchantCity" class="block text-xs font-semibold text-slate-600 mb-1">Cidade:</label>
-          <input type="text" id="merchantCity" required maxlength="15" placeholder="Ex: Sao Paulo" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-        </div>
-        <div>
-          <label for="txAmount" class="block text-xs font-semibold text-slate-600 mb-1">Valor (R$) <span class="text-slate-400 font-normal">(Opcional)</span>:</label>
-          <input type="text" id="txAmount" placeholder="0,00" oninput="formatCurrency(this)" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-        </div>
+      <!-- Nome do Recebedor -->
+      <div>
+        <label for="merchantName" class="block text-xs font-bold text-slate-700 mb-1">Nome do Recebedor:</label>
+        <input type="text" id="merchantName" required maxlength="25" placeholder="Seu Nome ou Razão Social" class="w-full p-3 border border-blue-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-700 placeholder-slate-400">
       </div>
 
-      <!-- Botões de Salvar/Excluir Chave -->
+      <!-- Cidade -->
+      <div>
+        <label for="merchantCity" class="block text-xs font-bold text-slate-700 mb-1">Cidade:</label>
+        <input type="text" id="merchantCity" required maxlength="15" placeholder="Sua Cidade" class="w-full p-3 border border-blue-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-700 placeholder-slate-400">
+      </div>
+
+      <!-- Valor (R$) (Opcional) -->
+      <div>
+        <label for="txAmount" class="block text-xs font-bold text-slate-700 mb-1">Valor (R$) (Opcional):</label>
+        <input type="text" id="txAmount" placeholder="0,00" oninput="formatCurrency(this)" class="w-full p-3 border border-blue-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-700 placeholder-slate-400">
+      </div>
+
+      <!-- Ações de Chave -->
       <div class="flex gap-2 pt-1">
-        <button type="button" onclick="saveCurrentKey()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-3 rounded-lg text-xs transition border border-slate-300 flex items-center justify-center gap-1">
-          ★ Salvar / Atualizar Chave
+        <button type="button" onclick="saveCurrentKey()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-3 rounded-xl text-xs transition border border-slate-200 flex items-center justify-center gap-1">
+          ★ Salvar Chave
         </button>
-        <button type="button" id="btnDeleteKey" onclick="deleteCurrentKey()" class="hidden bg-red-50 hover:bg-red-100 text-red-600 font-semibold py-2 px-3 rounded-lg text-xs transition border border-red-200">
+        <button type="button" id="btnDeleteKey" onclick="deleteCurrentKey()" class="hidden bg-red-50 hover:bg-red-100 text-red-600 font-semibold py-2 px-3 rounded-xl text-xs transition border border-red-200">
           🗑️ Excluir
         </button>
       </div>
 
-      <!-- Gerar QR Code -->
-      <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-md transition transform active:scale-95 flex items-center justify-center gap-2 mt-4">
-        ⚡ Gerar QR Code Pix
+      <!-- Botão Gerar QR Code (Exatamente igual ao da imagem) -->
+      <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-md transition transform active:scale-98 text-sm mt-4">
+        Gerar QR Code
       </button>
     </form>
 
-    <!-- Área de Resultado -->
-    <section id="resultArea" class="hidden mt-6 pt-6 border-t border-slate-200 text-center space-y-4">
-      <div id="qrcode" class="flex justify-center p-3 bg-white border border-slate-200 rounded-xl inline-block shadow-sm"></div>
+    <!-- Área do Resultado (Surgimento Suave) -->
+    <section id="resultArea" class="hidden mt-6 pt-6 border-t border-slate-100 text-center space-y-4">
+      <div id="qrcode" class="flex justify-center p-3 bg-white border border-slate-200 rounded-2xl inline-block shadow-sm"></div>
 
       <div>
-        <label class="block text-xs font-semibold text-slate-500 mb-1">Código Pix Copia e Cola:</label>
-        <textarea id="payloadText" readonly rows="3" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-600 break-all focus:outline-none cursor-pointer" onclick="copyPayload()"></textarea>
+        <label class="block text-xs font-bold text-slate-600 mb-1">Código Pix Copia e Cola:</label>
+        <textarea id="payloadText" readonly rows="3" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-600 break-all focus:outline-none cursor-pointer" onclick="copyPayload()"></textarea>
       </div>
 
       <div class="grid grid-cols-2 gap-2">
-        <button onclick="copyPayload()" class="bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold py-2.5 px-3 rounded-lg text-xs border border-blue-200 transition">
+        <button onclick="copyPayload()" class="bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold py-3 px-3 rounded-xl text-xs border border-blue-200 transition">
           📋 Copiar Código
         </button>
-        <button onclick="shareWhatsApp()" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1">
+        <button onclick="shareWhatsApp()" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-3 rounded-xl text-xs transition flex items-center justify-center gap-1">
           💬 WhatsApp
         </button>
       </div>
     </section>
 
-    <!-- Notificação Toast -->
-    <div id="toast" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs px-4 py-2 rounded-full shadow-lg transition-opacity duration-300 z-50"></div>
+    <!-- Toast Notification -->
+    <div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/90 text-white text-xs font-medium px-4 py-2.5 rounded-full shadow-2xl transition-all duration-300 z-50"></div>
   </main>
 
   <script>
@@ -117,7 +121,7 @@
     const DB_VERSION = 1;
     let db = null;
 
-    // Máscara de Moeda (R$)
+    // Máscara Automática de Moeda (R$)
     function formatCurrency(input) {
       let value = input.value.replace(/\D/g, '');
       if (!value) {
@@ -134,7 +138,31 @@
       return val.replace(/\./g, '').replace(',', '.');
     }
 
-    // Inicialização do IndexedDB
+    // Alterar rótulo da Chave conforme seleção
+    function updateKeyPlaceholder() {
+      const type = document.getElementById('keyType').value;
+      const lbl = document.getElementById('lblPixKey');
+      const input = document.getElementById('pixKey');
+
+      if (type === 'PHONE') {
+        lbl.textContent = 'Chave Pix (DDD + Número):';
+        input.placeholder = '(00) 00000-0000';
+      } else if (type === 'CPF') {
+        lbl.textContent = 'Chave Pix (CPF):';
+        input.placeholder = '000.000.000-00';
+      } else if (type === 'CNPJ') {
+        lbl.textContent = 'Chave Pix (CNPJ):';
+        input.placeholder = '00.000.000/0001-00';
+      } else if (type === 'EMAIL') {
+        lbl.textContent = 'Chave Pix (E-mail):';
+        input.placeholder = 'seu@email.com';
+      } else {
+        lbl.textContent = 'Chave Pix (Chave Aleatória):';
+        input.placeholder = '123e4567-e89b-12d3-a456-426614174000';
+      }
+    }
+
+    // IndexedDB
     function initDB() {
       const request = indexedDB.open(DB_NAME, DB_VERSION);
       request.onupgradeneeded = (e) => {
@@ -149,7 +177,6 @@
       };
     }
 
-    // Preencher Seletor de Chaves
     function populateKeysSelect() {
       if (!db) return;
       const tx = db.transaction('keys', 'readonly');
@@ -170,7 +197,6 @@
       };
     }
 
-    // Carregar dados ao selecionar
     function loadSelectedKey() {
       const id = document.getElementById('selectKey').value;
       const btnDelete = document.getElementById('btnDeleteKey');
@@ -192,18 +218,18 @@
         const data = request.result;
         if (data) {
           document.getElementById('keyAlias').value = data.alias || '';
-          document.getElementById('keyType').value = data.type || 'CPF';
+          document.getElementById('keyType').value = data.type || 'PHONE';
           document.getElementById('pixKey').value = data.key || '';
           document.getElementById('merchantName').value = data.name || '';
           document.getElementById('merchantCity').value = data.city || '';
+          updateKeyPlaceholder();
           btnDelete.classList.remove('hidden');
         }
       };
     }
 
-    // Salvar/Atualizar Chave
     function saveCurrentKey() {
-      const alias = document.getElementById('keyAlias').value.trim() || 'Chave Pix';
+      const alias = document.getElementById('keyAlias').value.trim() || 'Minha Chave';
       const type = document.getElementById('keyType').value;
       const key = document.getElementById('pixKey').value.trim();
       const name = document.getElementById('merchantName').value.trim();
@@ -211,7 +237,7 @@
       const selectedId = document.getElementById('selectKey').value;
 
       if (!key || !name || !city) {
-        showToast("Preencha Chave, Nome e Cidade para salvar.");
+        showToast("Preencha Chave, Nome e Cidade.");
         return;
       }
 
@@ -233,12 +259,11 @@
       };
     }
 
-    // Excluir Chave
     function deleteCurrentKey() {
       const id = document.getElementById('selectKey').value;
       if (!id) return;
 
-      if (confirm("Deseja excluir esta chave salva?")) {
+      if (confirm("Excluir esta chave salva?")) {
         const tx = db.transaction('keys', 'readwrite');
         const store = tx.objectStore('keys');
         store.delete(Number(id)).onsuccess = () => {
@@ -254,7 +279,7 @@
       }
     }
 
-    // Algoritmo CRC16
+    // CRC16
     function crc16(str) {
       let crc = 0xFFFF;
       for (let i = 0; i < str.length; i++) {
@@ -279,7 +304,6 @@
       return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().trim();
     }
 
-    // Gerar Código Pix
     function generatePix(e) {
       e.preventDefault();
 
@@ -306,7 +330,6 @@
 
       payload += crc16(payload);
 
-      // Renderizar QR Code
       const qrContainer = document.getElementById('qrcode');
       qrContainer.innerHTML = '';
       new QRCode(qrContainer, {
@@ -323,7 +346,6 @@
       document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // Copiar Payload
     function copyPayload() {
       const copyText = document.getElementById("payloadText");
       copyText.select();
@@ -331,7 +353,6 @@
       showToast("Código Copia e Cola copiado!");
     }
 
-    // Compartilhar WhatsApp
     function shareWhatsApp() {
       const payload = document.getElementById("payloadText").value;
       const amount = document.getElementById("txAmount").value;
@@ -358,3 +379,4 @@
   </script>
 </body>
 </html>
+
