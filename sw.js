@@ -1,4 +1,4 @@
-const CACHE_NAME = 'qr-pix-v2';
+const CACHE_NAME = 'qr-pix-v9';
 
 const ASSETS_TO_CACHE = [
     "./",
