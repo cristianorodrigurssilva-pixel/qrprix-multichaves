@@ -1,53 +1,75 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
   <defs>
-    <!-- Fundo Azul Tecnológico Profundo -->
-    <linearGradient id="bgOrigami" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1E3A8A" />
-      <stop offset="100%" stop-color="#0F172A" />
+    <!-- Fundo Escuro -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#12151e" />
+      <stop offset="100%" stop-color="#0a0c12" />
     </linearGradient>
 
-    <!-- Sombras 3D das Dobras -->
-    <filter id="shadowOrigami" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="4" dy="8" stdDeviation="6" flood-color="#000000" flood-opacity="0.5" />
+    <!-- Sombra de Destaque das Camadas -->
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#000000" flood-opacity="0.6"/>
     </filter>
   </defs>
 
-  <!-- Fundo do Ícone -->
-  <rect width="512" height="512" rx="110" fill="url(#bgOrigami)" />
+  <!-- Fundo com Cantos Arredondados -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
 
-  <!-- Moldura Estilizada de QR Code -->
-  <path d="M 120 170 V 130 H 170" stroke="#06B6D4" stroke-width="10" stroke-linecap="round" fill="none" />
-  <path d="M 342 130 H 392 V 170" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none" />
-  <path d="M 120 290 V 330 H 170" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none" />
-
-  <!-- Símbolo Pix em estilo Dobradura 3D -->
-  <g transform="translate(256, 215)" filter="url(#shadowOrigami)">
-    <!-- Losango Topo (Ciano Claro / Azul Celeste) -->
-    <polygon points="0,-70 32,-38 0,-6 -32,-38" fill="#38BDF8" />
-    <!-- Sombra da dobra do topo -->
-    <polygon points="0,-70 32,-38 0,-6" fill="#000000" opacity="0.18" />
-
-    <!-- Losango Direita (Ciano Neon Pix) -->
-    <polygon points="64,-6 96,26 64,58 32,26" fill="#06B6D4" />
-    <polygon points="64,-6 96,26 64,58" fill="#000000" opacity="0.18" />
-
-    <!-- Losango Baixo (Azul Royal Tecnológico) -->
-    <polygon points="0,26 32,58 0,90 -32,58" fill="#2563EB" />
-    <polygon points="0,26 32,58 0,90" fill="#000000" opacity="0.18" />
-
-    <!-- Losango Esquerda (Azul Marinho Vivo) -->
-    <polygon points="-64,-6 -32,26 -64,58 -96,26" fill="#1D4ED8" />
-    <polygon points="-64,-6 -32,26 -64,58" fill="#000000" opacity="0.18" />
-
-    <!-- Núcleo Conector Central (Branco) -->
-    <polygon points="0,-18 18,0 0,18 -18,0" fill="#FFFFFF" />
+  <!-- Moldura Estilo Scanner Original -->
+  <g stroke-width="16" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- Canto Superior Esquerdo (Coral) -->
+    <path d="M 120 160 L 120 120 C 120 115, 125 110, 130 110 L 170 110" stroke="#f0625d" />
+    
+    <!-- Canto Superior Direito (Verde Água) -->
+    <path d="M 342 110 L 382 110 C 387 110, 392 115, 392 120 L 392 160" stroke="#36cfa0" />
+    
+    <!-- Canto Inferior Esquerdo (Verde Água) -->
+    <path d="M 120 290 L 120 330 C 120 335, 125 340, 130 340 L 170 340" stroke="#36cfa0" />
   </g>
 
-  <!-- Nome QrPix com estilo Tipográfico Artístico -->
-  <text x="50%" y="435" font-family="'Trebuchet MS', 'Segoe UI', sans-serif" font-weight="900" font-size="52" fill="#FFFFFF" text-anchor="middle" letter-spacing="2">
-    Qr<tspan fill="#06B6D4">Pix</tspan>
+  <!-- Ponto Amarelo (Inferior Direito) -->
+  <circle cx="370" cy="325" r="10" fill="#ffd54f" />
+
+  <!-- Símbolo Central: Duas Camadas do Pix (Multi Chaves) -->
+  <g filter="url(#shadow)">
+    <!-- Camada de Trás (Sombra de Múltiplos Perfis/Chaves) -->
+    <g transform="translate(-14, -14)" opacity="0.45">
+      <polygon points="256,125 286,155 256,185 226,155" fill="#f0625d" />
+      <polygon points="201,180 231,210 201,240 171,210" fill="#00a8ff" />
+      <polygon points="311,180 341,210 311,240 281,210" fill="#4cd137" />
+      <polygon points="256,235 286,265 256,295 226,265" fill="#fbc531" />
+    </g>
+
+    <!-- Camada Principal (Frente) -->
+    <g transform="translate(6, 6)">
+      <!-- Losango Superior (Vermelho Bicolor) -->
+      <polygon points="256,125 286,155 256,185 226,155" fill="#ee5253" />
+      <polygon points="256,125 286,155 256,185" fill="#d63031" />
+
+      <!-- Losango Esquerda (Azul Bicolor) -->
+      <polygon points="201,180 231,210 201,240 171,210" fill="#00a8ff" />
+      <polygon points="201,180 231,210 201,240" fill="#0097e6" />
+
+      <!-- Losango Direita (Verde Bicolor) -->
+      <polygon points="311,180 341,210 311,240 281,210" fill="#4cd137" />
+      <polygon points="311,180 341,210 311,240" fill="#44bd32" />
+
+      <!-- Losango Inferior (Amarelo Bicolor) -->
+      <polygon points="256,235 286,265 256,295 226,265" fill="#fbc531" />
+      <polygon points="256,235 286,265 256,295" fill="#e1b12c" />
+
+      <!-- Losango Central Branco -->
+      <polygon points="256,198 268,210 256,222 244,210" fill="#ffffff" />
+    </g>
+  </g>
+
+  <!-- Nome Principal: QrPix -->
+  <text x="256" y="415" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="46" letter-spacing="1">
+    <tspan fill="#ffffff">Qr</tspan><tspan fill="#36cfa0">Pix</tspan>
   </text>
 
-  <!-- Detalhe de Ponto Flutuante (Pixel de QR) -->
-  <circle cx="365" cy="325" r="8" fill="#06B6D4" filter="url(#shadowOrigami)" />
+  <!-- Subtítulo: MULTI em Amarelo -->
+  <text x="256" y="452" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="20" fill="#ffd54f" letter-spacing="8">
+    MULTI
+  </text>
 </svg>
