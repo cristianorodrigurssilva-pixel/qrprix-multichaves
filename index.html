@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -159,7 +159,7 @@
   </main>
 
   <script>
-    const DB_NAME = 'QrPixDB_v4';
+    const DB_NAME = 'QrPixDB_v5';
     const DB_VERSION = 1;
     let db = null;
 
@@ -283,7 +283,6 @@
           document.getElementById('pixKey').value = data.key || '';
           document.getElementById('merchantName').value = data.name || '';
           document.getElementById('merchantCity').value = data.city || '';
-          updateKeyPlaceholder();
           btnDelete.classList.remove('hidden');
         } else {
           document.getElementById('keyAlias').value = '';
@@ -347,6 +346,7 @@
       };
       request.onsuccess = (e) => {
         db = e.target.result;
+        onBankChange();
       };
     }
 
@@ -489,5 +489,3 @@
   </script>
 </body>
 </html>
-     
-      
