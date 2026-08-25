@@ -4,489 +4,247 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>QrPix Multi</title>
-  
-  <!-- Configurações do PWA com os novos ícones v2 -->
-  <link rel="manifest" href="./manifest.json?v=2">
-  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=2">
-  <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png?v=2">
-  <link rel="apple-touch-icon" href="./icon-192.png?v=2">
+  <link rel="manifest" href="manifest.json?v=2">
   <meta name="theme-color" content="#12151e">
-
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script stroke-linecap="round" src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
-    body {
-      background: linear-gradient(180deg, #eef5ff 0%, #dbeafe 100%);
-    }
-    .custom-scroll::-webkit-scrollbar {
-      width: 6px;
-    }
-    .custom-scroll::-webkit-scrollbar-track {
-      background: #f1f5f9;
-      border-radius: 8px;
-    }
-    .custom-scroll::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 8px;
-    }
-    .custom-scroll::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
-    /* Regra Nativa para 2 Colunas no Celular (Anti-Cache do Tailwind) */
-    .grid-2-col {
-      display: flex !important;
-      flex-direction: row !important;
-      gap: 10px !important;
-      width: 100% !important;
-    }
-    .grid-2-col > div {
-      flex: 1 !important;
-      min-width: 0 !important;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #12151e; color: #ffffff; display: flex; justify-content: center; padding: 20px; min-height: 100vh; }
+    .container { width: 100%; max-width: 450px; background: #1a1e2d; padding: 24px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+    h1 { font-size: 24px; text-align: center; margin-bottom: 20px; color: #36cfa0; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; font-size: 13px; color: #a0aec0; margin-bottom: 6px; }
+    input, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #2d3748; background: #0f121d; color: #fff; font-size: 15px; outline: none; }
+    input:focus, select:focus { border-color: #36cfa0; }
+    .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+    button { flex: 1; padding: 12px; border: none; border-radius: 10px; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.2s; }
+    .btn-primary { background: #36cfa0; color: #0a0c12; }
+    .btn-secondary { background: #f0625d; color: #fff; }
+    .btn-danger { background: #e53e3e; color: #fff; margin-top: 5px; width: 100%; }
+    #qrcode { display: flex; justify-content: center; margin: 20px 0; padding: 15px; background: #fff; border-radius: 12px; }
+    .hidden { display: none; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-3 text-slate-800">
+<body>
 
-  <main class="w-full max-w-md bg-white rounded-3xl shadow-xl p-5 my-auto border border-blue-100">
-    <!-- Header -->
-    <header class="text-center mb-5">
-      <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight leading-none">
-        Qr<span class="text-cyan-500">Pix</span>
-      </h1>
-      <span class="text-[10px] font-extrabold tracking-[0.25em] text-amber-500 uppercase block mt-1">MULTI</span>
-    </header>
+<div class="container">
+  <h1>QrPix Multi</h1>
 
-    <!-- Formulário Principal -->
-    <form id="pixForm" onsubmit="generatePix(event)" class="space-y-4">
-      
-      <!-- GRUPO 1: Banco e Apelido -->
-      <div class="grid-2-col">
-        <div class="relative">
-          <label for="bankName" class="block text-xs font-bold text-slate-700 mb-1">Banco / Instituição:</label>
-          <div class="relative">
-            <input type="text" id="bankName" autocomplete="off" oninput="filterBanks(); onBankChange();" onclick="openBankDropdown()" onfocus="openBankDropdown()" placeholder="Selecione/Digite" class="w-full p-3 pr-8 border border-blue-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-800 placeholder-slate-400">
-            <button type="button" onclick="toggleBankDropdown()" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 text-xs">
-              ▼
-            </button>
-          </div>
+  <div class="form-group">
+    <label for="minhasChaves">Minhas Chaves Salvas:</label>
+    <select id="minhasChaves" onchange="carregarChaveSelecionada()">
+      <option value="">-- Selecione para carregar --</option>
+    </select>
+  </div>
 
-          <div id="bankDropdown" class="hidden absolute left-0 right-0 top-full mt-1 bg-white border border-blue-200 rounded-2xl shadow-xl z-50 max-h-60 overflow-y-auto custom-scroll p-1">
-            <div id="bankList" class="space-y-0.5"></div>
-          </div>
-        </div>
+  <button type="button" class="btn-danger hidden" id="btnExcluir" onclick="excluirChaveAtual()">Excluir Chave Selecionada</button>
 
-        <div>
-          <label for="keyAlias" class="block text-xs font-bold text-slate-700 mb-1">Apelido da Chave:</label>
-          <input type="text" id="keyAlias" placeholder="Ex: Principal, Loja" class="w-full p-3 border border-blue-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-800 placeholder-slate-400">
-        </div>
-      </div>
+  <hr style="border: 0.5px solid #2d3748; margin: 20px 0;">
 
-      <!-- GRUPO 2: Tipo de Chave e Chave Pix -->
-      <div class="grid-2-col">
-        <div>
-          <label for="keyType" class="block text-xs font-bold text-slate-700 mb-1">Tipo de Chave:</label>
-          <select id="keyType" onchange="onKeyTypeChange()" class="w-full p-3 border border-blue-200 rounded-xl text-sm text-slate-800 font-medium focus:ring-2 focus:ring-blue-500 outline-none transition bg-white">
-            <option value="PHONE">Celular</option>
-            <option value="CPF">CPF</option>
-            <option value="CNPJ">CNPJ</option>
-            <option value="EMAIL">E-mail</option>
-            <option value="EVP">Aleatória (EVP)</option>
-          </select>
-        </div>
+  <form id="pixForm" onsubmit="gerarPix(event)">
+    <div class="form-group">
+      <label for="banco">Nome do Banco / Identificador:</label>
+      <input type="text" id="banco" placeholder="Ex: Nubank, Itaú..." required>
+    </div>
 
-        <div>
-          <label id="lblPixKey" for="pixKey" class="block text-xs font-bold text-slate-700 mb-1">Chave Pix (DDD + Número):</label>
-          <input type="text" id="pixKey" required placeholder="(00) 00000-0000" class="w-full p-3 border border-blue-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-800 placeholder-slate-400">
-        </div>
-      </div>
+    <div class="form-group">
+      <label for="tipoChave">Tipo da Chave:</label>
+      <select id="tipoChave" required>
+        <option value="CPF">CPF</option>
+        <option value="CNPJ">CNPJ</option>
+        <option value="E-mail">E-mail</option>
+        <option value="Celular">Celular</option>
+        <option value="EVP">Chave Aleatória (EVP)</option>
+      </select>
+    </div>
 
-      <!-- GRUPO 3: Nome do Recebedor e Cidade -->
-      <div class="grid-2-col">
-        <div>
-          <label for="merchantName" class="block text-xs font-bold text-slate-700 mb-1">Nome do Recebedor:</label>
-          <input type="text" id="merchantName" required maxlength="25" placeholder="Seu Nome / Razão Social" class="w-full p-3 border border-blue-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-800 placeholder-slate-400">
-        </div>
+    <div class="form-group">
+      <label for="chave">Chave Pix:</label>
+      <input type="text" id="chave" placeholder="Digite a chave Pix" required>
+    </div>
 
-        <div>
-          <label for="merchantCity" class="block text-xs font-bold text-slate-700 mb-1">Cidade:</label>
-          <input type="text" id="merchantCity" required maxlength="15" placeholder="Sua Cidade" class="w-full p-3 border border-blue-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-800 placeholder-slate-400">
-        </div>
-      </div>
+    <div class="form-group">
+      <label for="nome">Nome do Beneficiário:</label>
+      <input type="text" id="nome" placeholder="Nome completo" required>
+    </div>
 
-      <!-- Valor -->
-      <div>
-        <label for="txAmount" class="block text-xs font-bold text-slate-700 mb-1">Valor (R$) (Opcional):</label>
-        <input type="text" id="txAmount" placeholder="0,00" oninput="formatCurrency(this)" class="w-full p-3 border border-blue-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-800 placeholder-slate-400">
-      </div>
+    <div class="form-group">
+      <label for="cidade">Cidade:</label>
+      <input type="text" id="cidade" placeholder="Ex: Fortal/SP..." required>
+    </div>
 
-      <!-- Botões de Ação da Chave -->
-      <div class="flex gap-2 pt-1">
-        <button type="button" onclick="saveCurrentKey()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 px-3 rounded-xl text-xs transition border border-slate-200 flex items-center justify-center gap-1">
-          ★ Salvar / Atualizar Dados
-        </button>
-        <button type="button" id="btnDeleteKey" onclick="deleteCurrentKey()" class="hidden bg-red-50 hover:bg-red-100 text-red-600 font-semibold py-2.5 px-3 rounded-xl text-xs transition border border-red-200">
-          🗑️ Excluir
-        </button>
-      </div>
+    <div class="form-group">
+      <label for="valor">Valor (Opcional):</label>
+      <input type="number" step="0.01" id="valor" placeholder="0.00">
+    </div>
 
-      <!-- Botão Gerar QR Code -->
-      <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-md transition transform active:scale-98 text-base mt-4">
-        Gerar QR Code
-      </button>
-    </form>
+    <div class="btn-group">
+      <button type="button" class="btn-secondary" onclick="salvarChaveAtual()">Salvar Chave</button>
+      <button type="submit" class="btn-primary">Gerar QR Code</button>
+    </div>
+  </form>
 
-    <!-- Área de Resultado -->
-    <section id="resultArea" class="hidden mt-6 pt-6 border-t border-slate-100 text-center space-y-4">
-      <div id="qrcode" class="flex justify-center p-3 bg-white border border-slate-200 rounded-2xl inline-block shadow-sm"></div>
+  <div id="qrArea" class="hidden">
+    <div id="qrcode"></div>
+    <div class="form-group">
+      <label>Código Copia e Cola:</label>
+      <input type="text" id="pixCopiaCola" readonly>
+    </div>
+    <button type="button" class="btn-primary" style="width:100%" onclick="copiarPix()">Copiar Código Pix</button>
+  </div>
+</div>
 
-      <div>
-        <label class="block text-xs font-bold text-slate-600 mb-1">Código Pix Copia e Cola:</label>
-        <textarea id="payloadText" readonly rows="3" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-600 break-all focus:outline-none cursor-pointer" onclick="copyPayload()"></textarea>
-      </div>
+<script>
+  let chavesSalvas = [];
 
-      <div class="grid grid-cols-2 gap-2">
-        <button onclick="copyPayload()" class="bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold py-3 px-3 rounded-xl text-xs border border-blue-200 transition">
-          📋 Copiar Código
-        </button>
-        <button onclick="shareWhatsApp()" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-3 rounded-xl text-xs transition flex items-center justify-center gap-1">
-          💬 WhatsApp
-        </button>
-      </div>
-    </section>
+  window.onload = function() {
+    atualizarListaChaves();
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  };
 
-    <!-- Toast Notification -->
-    <div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/90 text-white text-xs font-medium px-4 py-2.5 rounded-full shadow-2xl transition-all duration-300 z-50"></div>
-  </main>
+  function carregarChavesDoStorage() {
+    const dados = localStorage.getItem('qrpix_chaves_multi');
+    return dados ? JSON.parse(dados) : [];
+  }
 
-  <script>
-    const DB_NAME = 'QrPixDB_v3';
-    const DB_VERSION = 1;
-    let db = null;
+  function salvarChavesNoStorage(lista) {
+    localStorage.setItem('qrpix_chaves_multi', JSON.stringify(lista));
+  }
 
-    const DEFAULT_BANKS = [
-      "Nubank (260)", "Itaú Unibanco (341)", "Bradesco (237)", "Banco do Brasil (001)",
-      "Caixa Econômica Federal (104)", "Santander Brasil (033)", "Banco Inter (077)",
-      "C6 Bank (336)", "Mercado Pago (323)", "PicPay (380)", "PagBank / PagSeguro (290)",
-      "Sicoob (756)", "Sicredi (748)", "BTG Pactual (208)", "Banco Pan (623)",
-      "Banco Original / PicPay (212)", "Banco BMG (318)", "Banco Safra (422)",
-      "XP Investimentos (102)", "Avenue (500)", "Clear Corretora", "Rico Corretora",
-      "Neon Pagamentos (536)", "Banco BS2 (218)", "Banco Daycoval (707)",
-      "Banco Banrisul (041)", "Banco BRB - Brasília (070)", "Banco do Nordeste - BNB (004)",
-      "Banco da Amazônia - BASA (003)", "Ame Digital", "RecargaPay", "InfinitePay",
-      "Stone / Pagar.me (197)", "Asaas (198)", "Cora (403)"
-    ];
+  function atualizarListaChaves() {
+    chavesSalvas = carregarChavesDoStorage();
+    const select = document.getElementById('minhasChaves');
+    select.innerHTML = '<option value="">-- Selecione para carregar --</option>';
 
-    document.addEventListener('click', (e) => {
-      const container = document.getElementById('bankName').closest('.relative');
-      if (!container.contains(e.target)) {
-        closeBankDropdown();
-      }
+    chavesSalvas.forEach((item, index) => {
+      const option = document.createElement('option');
+      option.value = index;
+      option.textContent = `${item.banco} (${item.tipoChave}) - ${item.nome}`;
+      select.appendChild(option);
     });
 
-    function toggleBankDropdown() {
-      const dropdown = document.getElementById('bankDropdown');
-      if (dropdown.classList.contains('hidden')) {
-        openBankDropdown();
-      } else {
-        closeBankDropdown();
-      }
+    document.getElementById('btnExcluir').classList.add('hidden');
+  }
+
+  function salvarChaveAtual() {
+    const banco = document.getElementById('banco').value.trim();
+    const tipoChave = document.getElementById('tipoChave').value;
+    const chave = document.getElementById('chave').value.trim();
+    const nome = document.getElementById('nome').value.trim();
+    const cidade = document.getElementById('cidade').value.trim();
+
+    if (!banco || !chave || !nome || !cidade) {
+      alert("Preencha todos os campos obrigatórios antes de salvar!");
+      return;
     }
 
-    function openBankDropdown() {
-      filterBanks(true);
-      document.getElementById('bankDropdown').classList.remove('hidden');
+    const novaChave = { id: Date.now(), banco, tipoChave, chave, nome, cidade };
+    chavesSalvas = carregarChavesDoStorage();
+    
+    // Verifica se já existe a exata mesma combinação de banco + tipo de chave para atualizar
+    const indexExistente = chavesSalvas.findIndex(item => item.banco.toLowerCase() === banco.toLowerCase() && item.tipoChave === tipoChave);
+
+    if (indexExistente >= 0) {
+      chavesSalvas[indexExistente] = novaChave;
+    } else {
+      chavesSalvas.push(novaChave);
     }
 
-    function closeBankDropdown() {
-      document.getElementById('bankDropdown').classList.add('hidden');
+    salvarChavesNoStorage(chavesSalvas);
+    atualizarListaChaves();
+    alert(`Chave para ${banco} (${tipoChave}) salva com sucesso!`);
+  }
+
+  function carregarChaveSelecionada() {
+    const index = document.getElementById('minhasChaves').value;
+    if (index === "") {
+      document.getElementById('btnExcluir').classList.add('hidden');
+      return;
     }
 
-    function filterBanks(showAll = false) {
-      const inputVal = showAll ? '' : document.getElementById('bankName').value.toLowerCase().trim();
-
-      const render = (savedBankNames = []) => {
-        const allBanks = Array.from(new Set([...savedBankNames, ...DEFAULT_BANKS]));
-        const filtered = showAll ? allBanks : allBanks.filter(b => b.toLowerCase().includes(inputVal));
-        renderBankList(filtered, savedBankNames);
-      };
-
-      if (!db) {
-        render([]);
-        return;
-      }
-
-      const tx = db.transaction('keys', 'readonly');
-      const store = tx.objectStore('keys');
-      store.getAll().onsuccess = (e) => {
-        const savedRecords = e.target.result || [];
-        const savedBankNames = savedRecords.map(r => r.bank);
-        render(savedBankNames);
-      };
+    const item = chavesSalvas[index];
+    if (item) {
+      document.getElementById('banco').value = item.banco;
+      document.getElementById('tipoChave').value = item.tipoChave;
+      document.getElementById('chave').value = item.chave;
+      document.getElementById('nome').value = item.nome;
+      document.getElementById('cidade').value = item.cidade;
+      document.getElementById('btnExcluir').classList.remove('hidden');
     }
+  }
 
-    function renderBankList(banks, savedBankNames) {
-      const listContainer = document.getElementById('bankList');
-      listContainer.innerHTML = '';
+  function excluirChaveAtual() {
+    const index = document.getElementById('minhasChaves').value;
+    if (index === "") return;
 
-      if (banks.length === 0) {
-        listContainer.innerHTML = '<div class="p-3 text-xs text-slate-400 text-center">Nenhum banco encontrado.</div>';
-        return;
-      }
-
-      const sortedBanks = [...banks].sort((a, b) => {
-        const aSaved = savedBankNames.includes(a);
-        const bSaved = savedBankNames.includes(b);
-        if (aSaved && !bSaved) return -1;
-        if (!aSaved && bSaved) return 1;
-        return 0;
-      });
-
-      sortedBanks.forEach(bank => {
-        const isSaved = savedBankNames.includes(bank);
-        const item = document.createElement('div');
-        item.className = 'p-2.5 hover:bg-blue-50 cursor-pointer rounded-xl text-xs font-medium text-slate-700 flex items-center justify-between transition';
-        
-        item.innerHTML = `
-          <span>${bank}</span>
-          ${isSaved ? '<span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold">Salvo ★</span>' : ''}
-        `;
-
-        item.onclick = () => selectBank(bank);
-        listContainer.appendChild(item);
-      });
+    if (confirm("Deseja realmente excluir esta chave cadastrada?")) {
+      chavesSalvas.splice(index, 1);
+      salvarChavesNoStorage(chavesSalvas);
+      atualizarListaChaves();
+      document.getElementById('pixForm').reset();
+      alert("Chave removida!");
     }
+  }
 
-    function selectBank(bankName) {
-      document.getElementById('bankName').value = bankName;
-      closeBankDropdown();
-      onBankChange();
-    }
-
-    function onBankChange() {
-      const bankVal = document.getElementById('bankName').value.trim();
-      const btnDelete = document.getElementById('btnDeleteKey');
-
-      if (!bankVal || !db) {
-        btnDelete.classList.add('hidden');
-        return;
-      }
-
-      const tx = db.transaction('keys', 'readonly');
-      const store = tx.objectStore('keys');
-      const request = store.get(bankVal);
-
-      request.onsuccess = () => {
-        const data = request.result;
-        if (data) {
-          document.getElementById('keyAlias').value = data.alias || '';
-          document.getElementById('keyType').value = data.type || 'PHONE';
-          document.getElementById('pixKey').value = data.key || '';
-          document.getElementById('merchantName').value = data.name || '';
-          document.getElementById('merchantCity').value = data.city || '';
-          updateKeyPlaceholder();
-          btnDelete.classList.remove('hidden');
+  function CRC16(str) {
+    let crc = 0xFFFF;
+    for (let c = 0; c < str.length; c++) {
+      crc ^= str.charCodeAt(c) << 8;
+      for (let i = 0; i < 8; i++) {
+        if ((crc & 0x8000) !== 0) {
+          crc = ((crc << 1) ^ 0x1021) & 0xFFFF;
         } else {
-          document.getElementById('keyAlias').value = '';
-          btnDelete.classList.add('hidden');
-        }
-      };
-    }
-
-    function onKeyTypeChange() {
-      document.getElementById('pixKey').value = '';
-      updateKeyPlaceholder();
-    }
-
-    function updateKeyPlaceholder() {
-      const type = document.getElementById('keyType').value;
-      const lbl = document.getElementById('lblPixKey');
-      const input = document.getElementById('pixKey');
-
-      if (type === 'PHONE') {
-        lbl.textContent = 'Chave Pix (DDD + Número):';
-        input.placeholder = '(00) 00000-0000';
-      } else if (type === 'CPF') {
-        lbl.textContent = 'Chave Pix (CPF):';
-        input.placeholder = '000.000.000-00';
-      } else if (type === 'CNPJ') {
-        lbl.textContent = 'Chave Pix (CNPJ):';
-        input.placeholder = '00.000.000/0001-00';
-      } else if (type === 'EMAIL') {
-        lbl.textContent = 'Chave Pix (E-mail):';
-        input.placeholder = 'seu@email.com';
-      } else {
-        lbl.textContent = 'Chave Pix (Chave Aleatória):';
-        input.placeholder = '123e4567-e89b-12d3-a456-426614174000';
-      }
-    }
-
-    function formatCurrency(input) {
-      let value = input.value.replace(/\D/g, '');
-      if (!value) {
-        input.value = '';
-        return;
-      }
-      value = (parseInt(value, 10) / 100).toFixed(2);
-      input.value = value.replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    }
-
-    function getRawAmount() {
-      const val = document.getElementById('txAmount').value;
-      if (!val) return '0.00';
-      return val.replace(/\./g, '').replace(',', '.');
-    }
-
-    function initDB() {
-      const request = indexedDB.open(DB_NAME, DB_VERSION);
-      request.onupgradeneeded = (e) => {
-        const database = e.target.result;
-        if (!database.objectStoreNames.contains('keys')) {
-          database.createObjectStore('keys', { keyPath: 'bank' });
-        }
-      };
-      request.onsuccess = (e) => {
-        db = e.target.result;
-      };
-    }
-
-    function saveCurrentKey() {
-      const bank = document.getElementById('bankName').value.trim();
-      const alias = document.getElementById('keyAlias').value.trim();
-      const type = document.getElementById('keyType').value;
-      const key = document.getElementById('pixKey').value.trim();
-      const name = document.getElementById('merchantName').value.trim();
-      const city = document.getElementById('merchantCity').value.trim();
-
-      if (!bank || !key || !name || !city) {
-        showToast("Preencha Banco, Chave, Nome e Cidade para salvar.");
-        return;
-      }
-
-      const payloadData = { bank, alias, type, key, name, city };
-
-      const tx = db.transaction('keys', 'readwrite');
-      const store = tx.objectStore('keys');
-      store.put(payloadData).onsuccess = () => {
-        showToast("Dados do banco salvos com sucesso!");
-        document.getElementById('btnDeleteKey').classList.remove('hidden');
-      };
-    }
-
-    function deleteCurrentKey() {
-      const bank = document.getElementById('bankName').value.trim();
-      if (!bank) return;
-
-      if (confirm(`Excluir as configurações salvas para ${bank}?`)) {
-        const tx = db.transaction('keys', 'readwrite');
-        const store = tx.objectStore('keys');
-        store.delete(bank).onsuccess = () => {
-          showToast("Dados do banco excluídos.");
-          document.getElementById('bankName').value = '';
-          document.getElementById('keyAlias').value = '';
-          document.getElementById('pixKey').value = '';
-          document.getElementById('merchantName').value = '';
-          document.getElementById('merchantCity').value = '';
-          document.getElementById('btnDeleteKey').classList.add('hidden');
-        };
-      }
-    }
-
-    function crc16(str) {
-      let crc = 0xFFFF;
-      for (let i = 0; i < str.length; i++) {
-        crc ^= str.charCodeAt(i) << 8;
-        for (let j = 0; j < 8; j++) {
-          if ((crc & 0x8000) !== 0) {
-            crc = ((crc << 1) ^ 0x1021) & 0xFFFF;
-          } else {
-            crc = (crc << 1) & 0xFFFF;
-          }
+          crc = (crc << 1) & 0xFFFF;
         }
       }
-      return crc.toString(16).toUpperCase().padStart(4, '0');
+    }
+    return crc.toString(16).toUpperCase().padStart(4, '0');
+  }
+
+  function gerarPix(e) {
+    e.preventDefault();
+    const chave = document.getElementById('chave').value.trim();
+    const nome = document.getElementById('nome').value.trim();
+    const cidade = document.getElementById('cidade').value.trim();
+    const valorNum = parseFloat(document.getElementById('valor').value);
+
+    let payloadKey = `0014br.gov.bcb.pix01${chave.length.toString().padStart(2, '0')}${chave}`;
+    let merchantAccount = `26${payloadKey.length.toString().padStart(2, '0')}${payloadKey}`;
+    
+    let strPayload = `000201${merchantAccount}520400005303986`;
+
+    if (!isNaN(valorNum) && valorNum > 0) {
+      const valStr = valorNum.toFixed(2);
+      strPayload += `54${valStr.length.toString().padStart(2, '0')}${valStr}`;
     }
 
-    function formatField(id, val) {
-      const len = val.length.toString().padStart(2, '0');
-      return `${id}${len}${val}`;
-    }
+    strPayload += `5802BR59${nome.length.toString().padStart(2, '0')}${nome}60${cidade.length.toString().padStart(2, '0')}${cidade}62070503***6304`;
+    
+    const crc = CRC16(strPayload);
+    const pixCompleto = strPayload + crc;
 
-    function sanitizeText(str) {
-      return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().trim();
-    }
+    document.getElementById('pixCopiaCola').value = pixCompleto;
+    document.getElementById('qrcode').innerHTML = "";
+    
+    new QRCode(document.getElementById("qrcode"), {
+      text: pixCompleto,
+      width: 200,
+      height: 200
+    });
 
-    function generatePix(e) {
-      e.preventDefault();
+    document.getElementById('qrArea').classList.remove('hidden');
+  }
 
-      let key = document.getElementById('pixKey').value.trim();
-      let name = sanitizeText(document.getElementById('merchantName').value);
-      let city = sanitizeText(document.getElementById('merchantCity').value);
-      let amountVal = getRawAmount();
+  function copiarPix() {
+    const input = document.getElementById('pixCopiaCola');
+    input.select();
+    input.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(input.value);
+    alert("Código Pix copiado para a área de transferência!");
+  }
+</script>
 
-      const merchantAccountInfo = formatField('00', 'br.gov.bcb.pix') + formatField('01', key);
-      let payload = formatField('00', '01') +
-                    formatField('26', merchantAccountInfo) +
-                    formatField('52', '0000') +
-                    formatField('53', '986');
-
-      if (parseFloat(amountVal) > 0) {
-        payload += formatField('54', parseFloat(amountVal).toFixed(2));
-      }
-
-      payload += formatField('58', 'BR') +
-                 formatField('59', name) +
-                 formatField('60', city) +
-                 formatField('62', formatField('05', '***')) +
-                 '6304';
-
-      payload += crc16(payload);
-
-      const qrContainer = document.getElementById('qrcode');
-      qrContainer.innerHTML = '';
-      new QRCode(qrContainer, {
-        text: payload,
-        width: 180,
-        height: 180,
-        colorDark: "#0f172a",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.M
-      });
-
-      document.getElementById('payloadText').value = payload;
-      document.getElementById('resultArea').classList.remove('hidden');
-      document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function copyPayload() {
-      const copyText = document.getElementById("payloadText");
-      copyText.select();
-      navigator.clipboard.writeText(copyText.value);
-      showToast("Código Copia e Cola copiado!");
-    }
-
-    function shareWhatsApp() {
-      const payload = document.getElementById("payloadText").value;
-      const amount = document.getElementById("txAmount").value;
-      let msg = `Olá! Segue o código Pix para pagamento:\n\n\`${payload}\``;
-      if (amount) {
-        msg = `Olá! Segue o Pix no valor de *R$ ${amount}*:\n\n\`${payload}\``;
-      }
-      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
-    }
-
-    function showToast(msg) {
-      const toast = document.getElementById('toast');
-      toast.textContent = msg;
-      toast.classList.remove('hidden');
-      setTimeout(() => toast.classList.add('hidden'), 2500);
-    }
-
-    window.onload = () => {
-      initDB();
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW falhou:', err));
-      }
-    };
-  </script>
 </body>
 </html>
